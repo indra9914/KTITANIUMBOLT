@@ -1,0 +1,3 @@
+Options -Indexes
+RewriteRule ^(?:data|storage)/ - [F,L,NC]
+RewriteRule ^config\.local\.php$ - [F,L,NC]

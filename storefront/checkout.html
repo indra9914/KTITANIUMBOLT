@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#20201e">
+  <title>Checkout | K-Titanium Bolt</title>
+  <link rel="icon" href="/favicon-32.png">
+  <link rel="stylesheet" href="/storefront/storefront.css">
+  <script defer src="/storefront/storefront.js"></script>
+</head>
+<body data-view="checkout">
+  <div class="store-topline">Pesanan diproses dari gudang Bogor</div>
+  <header class="store-header"><div class="store-shell store-nav">
+    <a class="store-brand" href="/"><img src="/logo-k-titanium-transparent.png" alt="K-Titanium Bolt"><span>GROSIR ONEKSPEED</span></a>
+    <nav class="store-links" aria-label="Navigasi"><a href="/katalog">Lanjut belanja</a><a href="/#kontak">Kontak</a></nav>
+    <div class="store-tools"><a class="cart-link" href="/checkout">Keranjang <span class="cart-count" data-cart-count>0</span></a></div>
+  </div></header>
+  <main class="store-shell">
+    <header class="page-heading"><p class="eyebrow">Pesanan baru</p><h1>Checkout</h1><p>Isi alamat pengiriman. Tarif kurir dihitung dari area tujuan dan berat produk.</p></header>
+    <div class="checkout-layout">
+      <form id="checkout-form" data-checkout-form>
+        <section class="checkout-section"><h2>Data penerima</h2><div class="form-grid">
+          <div class="form-field"><label for="customer-name">Nama lengkap</label><input id="customer-name" name="customer_name" autocomplete="name" required maxlength="120"></div>
+          <div class="form-field"><label for="customer-phone">Nomor WhatsApp</label><input id="customer-phone" name="phone" type="tel" autocomplete="tel" required placeholder="0812 3456 7890"></div>
+          <div class="form-field full"><label for="customer-email">Email (opsional)</label><input id="customer-email" name="email" type="email" autocomplete="email"></div>
+          <div class="form-field full"><label for="shipping-address">Alamat lengkap</label><textarea id="shipping-address" name="shipping_address" autocomplete="street-address" required minlength="8" placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan"></textarea></div>
+          <div class="form-field full"><label for="shipping-area">Kecamatan / kode pos</label><input id="shipping-area" class="field" data-area-query autocomplete="off" required placeholder="Ketik min. 3 karakter, lalu pilih hasil"></div>
+        </div><div class="area-results" data-area-results aria-live="polite"></div></section>
+        <section class="checkout-section"><h2>Pilih pengiriman</h2><div class="shipping-rates" data-shipping-rates><p class="message">Pilih area tujuan untuk melihat layanan dan tarif.</p></div></section>
+        <section class="checkout-section"><h2>Catatan pesanan</h2><div class="form-field"><label for="order-notes">Catatan untuk admin (opsional)</label><textarea id="order-notes" name="notes" maxlength="1000" placeholder="Instruksi pengiriman atau informasi tambahan"></textarea></div></section>
+        <p class="message" data-checkout-message aria-live="polite"></p>
+      </form>
+      <aside class="summary-panel"><h2>Ringkasan</h2><div class="summary-lines" data-cart-items></div><div data-order-summary></div><p class="summary-note">Harga dan stok diperiksa kembali oleh server saat pesanan dibuat. Pembayaran online tersedia setelah akun merchant dihubungkan.</p><button class="button" type="submit" form="checkout-form" data-submit-order>Pesan dan bayar</button><p class="message">Dengan melanjutkan, Anda menyetujui pesanan diproses oleh K-Titanium Bolt.</p></aside>
+    </div>
+  </main>
+  <footer class="store-footer"><div class="store-shell"><a href="/katalog">Kembali ke katalog</a> · <a href="https://wa.me/6281998315468">Butuh bantuan?</a></div></footer>
+</body>
+</html>

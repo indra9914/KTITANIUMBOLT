@@ -1,0 +1,1039 @@
+<!DOCTYPE html><!-- Defines window.shopeeHeader / window.mobileMenuAuth / window.searchBar
+     so Alpine (loaded on window.load in BaseLayout) can resolve x-data
+     attributes on inline markup. Without this script, components see
+     "shopeeHeader is not defined" / "mobileMenuAuth is not defined"
+     because their `<script is:inline>` blocks are parsed AFTER the
+     divs that reference them — and the inline Alpine runtime parses
+     x-data BEFORE running those scripts. --><script>
+  window.shopeeHeader = function shopeeHeader() {
+    return {
+      isLoggedIn: false,
+      userName: '',
+      userEmail: '',
+      cartCount: 0,
+      showSearch: false,
+      showAccountMenu: false,
+      init() {
+        this.checkAuth();
+        this.refreshCart();
+        window.addEventListener('storage', function () { this.checkAuth(); this.refreshCart(); });
+        window.addEventListener('wallet-updated', function () { this.refreshCart(); });
+        window.addEventListener('cart-updated', function () { this.refreshCart(); });
+      },
+      async checkAuth() {
+        try {
+          const res = await fetch('/api/v1/auth/me', {
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include' });
+          if (!res.ok) { this.isLoggedIn = false; return; }
+          const data = await res.json();
+          const u = data?.data?.user ?? data?.user;
+          this.isLoggedIn = !!u;
+          if (u) { this.userName = u.name || u.email || 'User'; this.userEmail = u.email || ''; }
+        } catch (e) { this.isLoggedIn = false; }
+      },
+      refreshCart() {
+        fetch('/api/v1/cart/count', { credentials: 'include', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { this.cartCount = (d && d.data && d.data.count) || 0; }.bind(this))
+          .catch(function () { this.cartCount = 0; }.bind(this));
+      },
+    };
+  };
+  window.searchBar = function searchBar() {
+    return { query: '', init: function () {} };
+  };
+  window.mobileMenuAuth = function mobileMenuAuth() {
+    return {
+      open: false,
+      isLoggedIn: false,
+      userName: '',
+      userEmail: '',
+      init() {
+        this.checkAuth();
+      },
+      async checkAuth() {
+        try {
+          const res = await fetch('/api/v1/auth/me', {
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include' });
+          if (!res.ok) { this.isLoggedIn = false; return; }
+          const data = await res.json();
+          const u = data?.data?.user ?? data?.user;
+          this.isLoggedIn = !!u;
+          if (u) { this.userName = u.name || u.email || 'User'; this.userEmail = u.email || ''; }
+        } catch (e) { this.isLoggedIn = false; }
+      },
+      async logout() {
+        try {
+          await fetch('/api/v1/auth/logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include' });
+        } catch (e) { /* ignore */ }
+        this.isLoggedIn = false;
+        this.open = false;
+        window.location.href = '/';
+      },
+    };
+  };
+</script><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#FA0F00"><meta name="format-detection" content="telephone=no"><!-- Favicon (v=4 = cache-bust after deploy; bump on any favicon
+         change so browsers refetch instead of holding the old asset for
+         the lifetime of the cache window). The bare /favicon.ico link
+         below covers browsers that ignore query strings on favicons or
+         fall back to the legacy URL. PNG/ICO variants are regenerated
+         from public/favicon-source.jpg (the K GR5 logo) at deploy time
+         when the source changes. --><link rel="icon" type="image/x-icon" href="../favicon.ico%3Fv=4"><link rel="icon" type="image/svg+xml" href="../favicon.svg%3Fv=4" sizes="any"><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png%3Fv=4"><link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png%3Fv=4"><link rel="icon" type="image/png" sizes="48x48" href="../favicon-48x48.png%3Fv=4"><link rel="shortcut icon" href="../favicon.ico"><!-- Apple --><link rel="apple-touch-icon" sizes="152x152" href="https://ktitaniumbolt.com/apple-touch-icon-152x152.png?v=4"><link rel="apple-touch-icon" sizes="167x167" href="https://ktitaniumbolt.com/apple-touch-icon-167x167.png?v=4"><link rel="apple-touch-icon" sizes="180x180" href="https://ktitaniumbolt.com/apple-touch-icon.png?v=4"><link rel="apple-touch-icon-precomposed" href="https://ktitaniumbolt.com/apple-touch-icon-precomposed.png?v=4"><!-- Android / PWA --><link rel="manifest" href="../manifest.webmanifest%3Fv=4"><link rel="icon" type="image/png" sizes="192x192" href="../android-chrome-192x192.png%3Fv=4"><link rel="icon" type="image/png" sizes="512x512" href="../android-chrome-512x512.png%3Fv=4"><!-- Microsoft --><meta name="msapplication-TileColor" content="#FA0F00"><meta name="msapplication-TileImage" content="/mstile-150x150.png"><meta name="msapplication-config" content="/browserconfig.xml"><meta name="application-name" content="K Titanium Bolt"><!-- Safari pinned tab --><link rel="mask-icon" href="https://ktitaniumbolt.com/safari-pinned-tab.svg" color="#FA0F00"><!-- Primary SEO --><title>Jual BAUT TITANIUM DRAT 10 PANJANG 1,5CM ( M6x15 BIG ) - Beli Baut Titanium Gr5 | K Titanium Bolt</title><meta name="description" content="Jual BAUT TITANIUM DRAT 10 PANJANG 1,5CM ( M6x15 BIG ) - READY BAUT TITANIUM M6HARGA DIATAS UNTUK 1 PCS ( 1 BIJI ) harga Rp 9.000. Siap kirim · supplier grosir di Bogor. Beli di K Titanium Bolt."><meta name="keywords" content="baut titanium, mur titanium, sekrup titanium, anchor titanium, titanium grade 5, titanium Gr5, baut Gr5, aksesoris titanium, baut mobil racing, baut motor racing, supplier baut titanium Indonesia, K Titanium Bolt"><meta name="author" content="K Titanium Bolt"><meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1"><meta name="googlebot" content="index, follow"><meta name="language" content="Indonesian"><meta name="geo.region" content="ID-JB"><meta name="geo.placename" content="Cikarang, Bekasi"><meta name="geo.position" content="-6.2615;107.1528"><meta name="ICBM" content="-6.2615, 107.1528"><meta name="rating" content="general"><meta name="distribution" content="global"><meta name="revisit-after" content="3 days"><link rel="canonical" href="baut-titanium-drat-10-panjang-15cm-m6x15-big-.html"><link rel="alternate" hreflang="id" href="baut-titanium-drat-10-panjang-15cm-m6x15-big-.html"><link rel="alternate" hreflang="x-default" href="baut-titanium-drat-10-panjang-15cm-m6x15-big-.html"><!-- Open Graph --><meta property="og:site_name" content="K Titanium Bolt"><meta property="og:locale" content="id_ID"><meta property="og:type" content="product"><meta property="og:url" content="https://ktitaniumbolt.com/katalog/baut-titanium-drat-10-panjang-15cm-m6x15-big-"><meta property="og:title" content="Jual BAUT TITANIUM DRAT 10 PANJANG 1,5CM ( M6x15 BIG ) - Beli Baut Titanium Gr5 | K Titanium Bolt"><meta property="og:description" content="Jual BAUT TITANIUM DRAT 10 PANJANG 1,5CM ( M6x15 BIG ) - READY BAUT TITANIUM M6HARGA DIATAS UNTUK 1 PCS ( 1 BIJI ) harga Rp 9.000. Siap kirim · supplier grosir di Bogor. Beli di K Titanium Bolt."><meta property="og:image" content="https://ktitaniumbolt.com/uploads/products/125/nWu7anV3vKZQeZGc0JQn.jpeg"><meta property="og:image:secure_url" content="https://ktitaniumbolt.com/uploads/products/125/nWu7anV3vKZQeZGc0JQn.jpeg"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="1200"><meta property="og:image:alt" content="BAUT TITANIUM DRAT 10 PANJANG 1,5CM ( M6x15 BIG )"><!-- Twitter / X --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@ktitanium"><meta name="twitter:creator" content="@ktitanium"><meta name="twitter:title" content="Jual BAUT TITANIUM DRAT 10 PANJANG 1,5CM ( M6x15 BIG ) - Beli Baut Titanium Gr5 | K Titanium Bolt"><meta name="twitter:description" content="Jual BAUT TITANIUM DRAT 10 PANJANG 1,5CM ( M6x15 BIG ) - READY BAUT TITANIUM M6HARGA DIATAS UNTUK 1 PCS ( 1 BIJI ) harga Rp 9.000. Siap kirim · supplier grosir di Bogor. Beli di K Titanium Bolt."><meta name="twitter:image" content="https://ktitaniumbolt.com/uploads/products/125/nWu7anV3vKZQeZGc0JQn.jpeg"><meta name="twitter:image:alt" content="BAUT TITANIUM DRAT 10 PANJANG 1,5CM ( M6x15 BIG )"><!-- Structured Data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"K Titanium Bolt","url":"https://ktitaniumbolt.com","logo":"https://ktitaniumbolt.com/images/logo.jpeg","sameAs":["https://instagram.com/ktitanium","https://facebook.com/ktitanium","https://tiktok.com/@ktitanium","https://youtube.com/@ktitanium"],"contactPoint":{"@type":"ContactPoint","contactType":"customer service","telephone":"+62-819-9831-5468","email":"onekspeedshop@gmail.com","areaServed":"ID","availableLanguage":["Indonesian"]}}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"K Titanium Bolt","url":"https://ktitaniumbolt.com","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://ktitaniumbolt.com/katalog?search={search_term_string}"},"query-input":"required name=search_term_string"}}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://ktitaniumbolt.com/#business","name":"K Titanium Bolt","image":"https://ktitaniumbolt.com/images/og-default.jpg","url":"https://ktitaniumbolt.com","telephone":"+62-819-9831-5468","email":"onekspeedshop@gmail.com","priceRange":"Rp 5.000 - Rp 200.000","address":{"@type":"PostalAddress","streetAddress":"Jl. Kol Ahmad Syam Kampung Tangkil RT 2 RW 5","addressLocality":"Bogor","addressRegion":"Jawa Barat","postalCode":"16144","addressCountry":"ID"},"geo":{"@type":"GeoCoordinates","latitude":-6.6295,"longitude":106.8287},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"opens":"09:00","closes":"18:00"}],"sameAs":["https://instagram.com/ktitanium","https://facebook.com/ktitanium"]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"BAUT TITANIUM DRAT 10 PANJANG 1,5CM ( M6x15 BIG )","description":"READY BAUT TITANIUM M6HARGA DIATAS UNTUK 1 PCS ( 1 BIJI )","image":"https://ktitaniumbolt.com/uploads/products/125/nWu7anV3vKZQeZGc0JQn.jpeg","brand":{"@type":"Brand","name":"K Titanium Bolt"},"offers":{"@type":"Offer","url":"https://ktitaniumbolt.com/katalog/baut-titanium-drat-10-panjang-15cm-m6x15-big-","priceCurrency":"IDR","price":9000,"availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition"}}</script><!-- Preconnect / DNS prefetch --><link rel="dns-prefetch" href="https://www.google.com"><!-- Outfit font — load async (preload + onload swap), no render-blocking.
+         Was a CSS @import in global.css, which blocks the stylesheet fetch. --><link rel="preload" as="style" href="../fonts/outfit.css" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="../fonts/outfit.css"></noscript><!-- Phosphor Icons — load async, no render-blocking, swap-in once parsed --><link rel="preload" as="style" href="../vendor/phosphor/bold/style.css" onload="this.onload=null;this.rel='stylesheet'"><link rel="preload" as="style" href="../vendor/phosphor/fill/style.css" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="../vendor/phosphor/bold/style.css"><link rel="stylesheet" href="../vendor/phosphor/fill/style.css"></noscript><!-- Alpine.js — loaded right after DOMContentLoaded so x-data/x-show on
+         the header, mobile menu, and search modal activate at first paint
+         instead of waiting for window.load (~300-500ms slower on 3G). The
+         defer attribute keeps it off the parser's critical path. --><script type="module">window.addEventListener(`DOMContentLoaded`,function(){var e=document.createElement(`script`);e.src=`https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js`,e.defer=!0,document.head.appendChild(e)});</script><!-- Product image reveal — batches each product grid so cards fade in
+         top-left-to-bottom-right in DOM order (Tokopedia-style) instead of
+         popping in whichever-loads-first, which looked chaotic. Each grid
+         is a separate chain; a slow/broken image can't block the batch
+         forever because of the per-step fallback timeout. --><script>
+      (function () {
+        function revealChain(container) {
+          var wrappers = Array.prototype.slice.call(container.querySelectorAll('.product-image-skeleton'));
+          if (!wrappers.length) return;
+
+          // Downloading (parallel, listener attached to every image up
+          // front) is deliberately decoupled from revealing (sequential,
+          // in DOM order) below. The previous version attached image N+1's
+          // listener only once image N had already revealed — so if N+1
+          // finished downloading (and fired its native `load` event)
+          // before the chain ever reached it, that event was missed
+          // entirely and the image stayed stuck on its skeleton forever
+          // (confirmed live on a mobile layout where columns let later
+          // cards' images start — and finish — downloading well ahead of
+          // earlier ones). Attaching every listener immediately means no
+          // image's completion can ever be missed, no matter what order
+          // the network resolves them in; `revealedUpTo` still walks the
+          // wrappers in order so the fade-in stays top-left-to-bottom-right.
+          var ready = wrappers.map(function () { return false; });
+          var revealedUpTo = 0;
+
+          function tryAdvance() {
+            while (revealedUpTo < wrappers.length && ready[revealedUpTo]) {
+              var wrapper = wrappers[revealedUpTo];
+              var img = wrapper.querySelector('img');
+              wrapper.classList.add('loaded');
+              if (img) img.style.opacity = '1';
+              revealedUpTo++;
+            }
+          }
+
+          wrappers.forEach(function (wrapper, i) {
+            var img = wrapper.querySelector('img');
+            if (!img) { ready[i] = true; tryAdvance(); return; }
+            var done = false;
+            function mark() {
+              if (done) return;
+              done = true;
+              ready[i] = true;
+              tryAdvance();
+            }
+            if (img.complete && img.naturalWidth > 0) {
+              mark();
+            } else {
+              img.addEventListener('load', mark, { once: true });
+              img.addEventListener('error', mark, { once: true });
+              // Safety valve only, not a normal-path timer. Product
+              // images are now compressed on upload (see
+              // ImageUploadService) so they should resolve in well under
+              // a second even on 3G; this just stops a genuinely stuck
+              // request (dead connection, no load/error ever fires) from
+              // blocking the rest of the grid's reveal order forever. A
+              // short timeout here (previously 500ms) fired on ordinary
+              // slow connections and force-revealed a half-downloaded,
+              // visibly torn image — that's the bug this was rewritten
+              // to fix.
+              setTimeout(mark, 12000);
+            }
+          });
+        }
+
+        function init() {
+          document.querySelectorAll('.grid').forEach(function (grid) {
+            revealChain(grid);
+          });
+        }
+
+        // Exposed so pages that render product grids client-side (Alpine
+        // x-for after a fetch, React after hydration) can re-run the
+        // batch reveal once their DOM actually exists — the DOMContentLoaded
+        // pass below only catches grids present in the initial server HTML.
+        window.revealImageGrid = revealChain;
+        window.revealAllImageGrids = init;
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', init);
+        } else {
+          init();
+        }
+      })();
+    </script><!-- Page-view analytics beacon. Fires once per page mount. Product
+         detail pages fire their OWN beacon from React with the correct
+         entity_id (mounted after DOMContentLoaded) so the timing race
+         with window.__ktProductId doesn't drop the entity. We track
+         non-product pages here so the admin dashboard still sees them.
+         Dev is skipped to avoid polluting prod data while iterating. --><script>
+      (function() {
+        if (typeof window === 'undefined') return;
+        var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.endsWith('.local');
+        if (isLocal) return;
+
+        var path = location.pathname;
+        var pageType = null;
+        var entityId = null;
+        var entitySlug = '';
+        if (path === '/' || path === '') pageType = 'home';
+        else if (path === '/katalog' || path.indexOf('/katalog?') === 0) pageType = 'catalog';
+        else if (path === '/keranjang' || path.indexOf('/keranjang?') === 0) pageType = 'cart';
+        else if (path.indexOf('/checkout') === 0) pageType = 'checkout';
+        else if (path.indexOf('/cari') === 0 || path.indexOf('/search') === 0) pageType = 'search';
+        // /katalog/[slug] is intentionally NOT tracked here — the
+        // ProductDetail React component fires its own beacon with the
+        // correct entity_id after mount, which is when this script
+        // would otherwise read an undefined window.__ktProductId.
+        else if (
+          path === '/tentang' || path === '/bantuan' || path === '/privasi' ||
+          path === '/syarat-ketentuan' || path === '/kontak'
+        ) pageType = 'static';
+
+        if (!pageType) return;
+
+        var body = JSON.stringify({
+          page_type: pageType,
+          entity_type: '',
+          entity_id: undefined,
+          entity_slug: '',
+          referrer: document.referrer || '',
+        });
+
+        try {
+          if (navigator.sendBeacon) {
+            navigator.sendBeacon('/api/v1/track/view', new Blob([body], { type: 'application/json' }));
+            return;
+          }
+        } catch (e) {}
+        try {
+          fetch('/api/v1/track/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: body,
+            keepalive: true,
+          }).catch(function() {});
+        } catch (e) {}
+      })();
+    </script><!-- Auth Interceptor — defer to keep parser non-blocking. Wrapped in
+         DOMContentLoaded so DOM is ready when it runs. Session is an HttpOnly
+         cookie (set at login); the client can't read or expire it, so on 401
+         we simply clean legacy local state and let the API 401 flow redirect. --><script defer>
+      document.addEventListener('DOMContentLoaded', function() {
+      (function() {
+        const origFetch = window.fetch;
+        window.fetch = function() {
+          return origFetch.apply(this, arguments).then(response => {
+            if (response.status === 401) {
+              // Legacy cleanup only — the real session lives in the cookie.
+              if (window.location.pathname.startsWith('/admin')) {
+                window.location.href = '/masuk';
+              }
+            }
+            return response;
+          });
+        };
+      })();
+      });
+    </script><link rel="stylesheet" href="../_astro/BaseLayout.BW3ypyEm.css"><style>.cs-whatsapp-fab[data-astro-cid-npogderr]{z-index:60;background:#25d366;border-radius:9999px;justify-content:center;align-items:center;width:56px;height:56px;transition:transform .2s,box-shadow .2s;display:inline-flex;position:fixed;bottom:84px;right:16px;box-shadow:0 6px 16px #25d36673,0 2px 6px #0000002e}.cs-whatsapp-fab[data-astro-cid-npogderr]:hover{transform:translateY(-2px);box-shadow:0 10px 22px #25d3668c,0 4px 8px #00000038}@media (width>=768px){.cs-whatsapp-fab[data-astro-cid-npogderr]{width:64px;height:64px;bottom:28px;right:28px}}
+</style></head><body class="font-sans antialiased text-apple-gray-900 bg-white"><div class="min-h-screen flex flex-col" data-astro-cid-npogderr><header class="sticky top-0 z-40 transition-shadow duration-300" x-data="shopeeHeader()" x-init="$nextTick(() =&gt; { if (window.scrollY &gt; 10) $el.classList.add('shadow-lg') })" x-on:scroll.window="if (window.scrollY &gt; 10) { $el.classList.add('shadow-lg') } else { $el.classList.remove('shadow-lg') }" style="background: white; border-bottom: 1px solid #F0F0F0;"><!-- Top utility bar (Shopee-style dark strip) --><div class="hidden md:block" style="background: #1B1B1B; color: white;"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-9 text-[12px]"><div class="flex items-center gap-4" style="color: rgba(255,255,255,0.85);"><a href="../katalog.html" class="hover:text-white transition-colors flex items-center gap-1.5"><i class="ph-bold ph-storefront text-[13px]"></i> Semua Produk</a><span class="hidden lg:inline" style="color: rgba(255,255,255,0.3);">|</span><a href="../static/cara-belanja.html" class="hidden lg:inline hover:text-white transition-colors">Cara Belanja</a><a href="../static/bantuan.html" class="hidden lg:inline hover:text-white transition-colors">Bantuan</a><a href="https://ktitaniumbolt.com/static/kebijakan-privasi" class="hidden lg:inline hover:text-white transition-colors">Privasi</a></div><div class="flex items-center gap-3" style="color: rgba(255,255,255,0.85);"><template x-if="!isLoggedIn"><div class="flex items-center gap-3"><a href="baut-titanium-drat-10-panjang-15cm-m6x15-big-.html#" onclick="window.openLoginModal(); return false;" class="hover:text-white transition-colors">Masuk</a><span style="color: rgba(255,255,255,0.3);">|</span><a href="https://ktitaniumbolt.com/daftar" class="hover:text-white transition-colors">Daftar</a></div></template><template x-if="isLoggedIn"><div class="flex items-center gap-3"><a href="https://ktitaniumbolt.com/notifikasi" class="hover:text-white transition-colors flex items-center gap-1.5"><i class="ph-bold ph-bell text-[13px]"></i><span>Notifikasi</span><template x-if="unreadCount &gt; 0"><span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold" style="background: #FA0F00;" x-text="unreadCount"></span></template></a><span style="color: rgba(255,255,255,0.3);">|</span><a href="https://ktitaniumbolt.com/akun" class="hover:text-white transition-colors flex items-center gap-1.5"><i class="ph-bold ph-user text-[13px]"></i><span x-text="userName"></span></a><span style="color: rgba(255,255,255,0.3);">|</span><button x-on:click="logout()" class="hover:text-white transition-colors">Keluar</button></div></template></div></div></div><!-- Main bar --><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex items-center gap-3 lg:gap-6 h-16 lg:h-24"><!-- Mobile: Logo + Right --><div class="flex items-center justify-between w-full lg:hidden"><a href="../katalog.html" class="flex items-center flex-shrink-0 product-image-skeleton rounded-md overflow-hidden"><img src="../images/logo.jpeg" alt="K Titanium Bolt" class="h-9 w-auto" decoding="async" width="120" height="48" style="opacity: 0; transition: opacity 300ms ease-out;" onload="this.style.opacity='1'; this.closest('.product-image-skeleton').classList.add('loaded');"></a><div class="flex items-center gap-1"><a href="https://ktitaniumbolt.com/keranjang" class="relative p-2.5 rounded-lg" style="color: #1B1B1B;"><i class="ph-bold ph-shopping-cart text-2xl"></i><span x-show="cartCount &gt; 0" x-text="cartCount" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 text-white text-[10px] font-bold rounded-full flex items-center justify-center" style="background: #FA0F00;"></span></a><div x-data="{ open: false }"><button type="button" class="p-2.5 rounded-lg" style="color: #1B1B1B;" x-on:click="$dispatch('open-mobile-menu')" title="Menu"><i class="ph-bold ph-list text-2xl"></i></button></div></div></div><!-- Desktop: Logo + Search + Cart --><a href="../katalog.html" class="hidden lg:flex items-center flex-shrink-0 transition-transform hover:scale-105 product-image-skeleton rounded-md overflow-hidden"><img src="../images/logo.jpeg" alt="K Titanium Bolt" class="h-12 w-auto" decoding="async" width="160" height="64" style="opacity: 0; transition: opacity 300ms ease-out;" onload="this.style.opacity='1'; this.closest('.product-image-skeleton').classList.add('loaded');"></a><!-- Desktop search bar (Shopee-style, large) --><div class="hidden lg:flex flex-1 relative" x-data="searchBar()"><div class="flex items-center w-full rounded-lg overflow-hidden transition-all" style="background: white; border: 2px solid #FA0F00;"><input type="text" x-model="query" x-on:input.debounce.300ms="search()" x-on:focus="show = true" x-on:blur="setTimeout(() =&gt; show = false, 200)" placeholder="Cari baut, mur, atau produk titanium..." class="flex-1 px-4 py-2.5 text-sm focus:outline-none" style="color: #1B1B1B; background: white;"><button type="button" class="px-5 py-2.5 text-white transition-colors flex items-center gap-1.5" style="background: #FA0F00;" onmouseover="this.style.background='#E00D00'" onmouseout="this.style.background='#FA0F00'" x-on:click="goSearch()"><i class="ph-bold ph-magnifying-glass text-lg"></i><span class="text-sm font-semibold">Cari</span></button></div><!-- Suggestions dropdown --><div x-show="show &amp;&amp; (results.length &gt; 0 || loading)" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="absolute top-full left-0 right-0 mt-1 rounded-lg overflow-hidden z-50" style="background: white; border: 1px solid #D3D3D3; box-shadow: 0 8px 24px rgba(0,0,0,0.12);"><template x-if="loading"><div class="p-4 text-center text-sm" style="color: #6E6E6E;"><i class="ph-bold ph-spinner animate-spin"></i> Mencari...</div></template><template x-if="!loading &amp;&amp; results.length &gt; 0"><div class="max-h-96 overflow-y-auto"><template x-for="item in results" :key="item.id"><a :href="'/katalog/' + item.slug" class="flex items-center gap-3 p-3 transition-colors hover:bg-[#F5F5F5] border-b border-[#F0F0F0] last:border-0"><div class="w-12 h-12 rounded flex-shrink-0 overflow-hidden" style="background: #F5F5F5;"><template x-if="item.primary_image"><img :src="item.primary_image" :alt="item.name" class="w-full h-full object-cover" loading="lazy" decoding="async"></template></div><div class="flex-1 min-w-0"><p class="text-sm font-medium line-clamp-1" style="color: #1B1B1B;" x-text="item.name"></p><p class="text-xs mt-0.5" style="color: #FA0F00;" x-text="formatRupiah(item.min_discount_price || item.min_price)"></p></div></a></template></div></template><template x-if="!loading &amp;&amp; query.length &gt;= 2 &amp;&amp; results.length === 0"><div class="p-4 text-center text-sm" style="color: #6E6E6E;">Tidak ada hasil untuk "<span x-text="query" class="font-semibold"></span>"</div></template></div></div><!-- Desktop right: cart + user --><div class="hidden lg:flex items-center gap-2 flex-shrink-0"><!-- Cart icon --><a href="https://ktitaniumbolt.com/keranjang" class="relative flex flex-col items-center px-4 py-1.5 rounded-lg transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;"><i class="ph-bold ph-shopping-cart text-2xl"></i><span class="text-[11px] mt-0.5">Keranjang</span><span x-show="cartCount &gt; 0" x-text="cartCount" class="absolute top-0 right-2 min-w-[20px] h-[20px] px-1.5 text-white text-[10px] font-bold rounded-full flex items-center justify-center" style="background: #FA0F00;"></span></a><!-- Notif --><a href="https://ktitaniumbolt.com/notifikasi" class="relative flex flex-col items-center px-4 py-1.5 rounded-lg transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;"><i class="ph-bold ph-bell text-2xl"></i><span class="text-[11px] mt-0.5">Notifikasi</span><template x-if="unreadCount &gt; 0"><span class="absolute top-0 right-2 min-w-[20px] h-[20px] px-1.5 text-white text-[10px] font-bold rounded-full flex items-center justify-center" style="background: #FA0F00;" x-text="unreadCount"></span></template></a><!-- User menu --><div x-data="{ open: false }" class="relative" x-on:click.away="open = false"><button type="button" class="flex flex-col items-center px-4 py-1.5 rounded-lg transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = !open" title="Akun"><i class="ph-bold ph-user-circle text-2xl"></i><span class="text-[11px] mt-0.5" x-text="isLoggedIn ? (userName || 'Akun').split(' ')[0] : 'Akun'"></span></button><!-- Dropdown --><div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 -translate-y-1" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 -translate-y-1" class="absolute right-0 top-full w-56 rounded-lg overflow-hidden z-50 mt-1" style="background: white; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1px solid #E8E8E8;"><template x-if="!isLoggedIn"><div class="p-3"><a href="baut-titanium-drat-10-panjang-15cm-m6x15-big-.html#" onclick="window.openLoginModal(); return false;" class="block w-full py-2 rounded-lg text-sm font-semibold text-white text-center transition-colors" style="background: #FA0F00;" onmouseover="this.style.background='#E00D00'" onmouseout="this.style.background='#FA0F00'">Masuk</a><a href="https://ktitaniumbolt.com/daftar" class="block w-full py-2 mt-2 rounded-lg text-sm font-semibold text-center transition-colors" style="background: white; color: #1B1B1B; border: 1px solid #D3D3D3;">Daftar</a></div></template><template x-if="isLoggedIn"><div class="py-1"><div class="px-4 py-2.5 border-b" style="border-color: #F0F0F0;"><p class="text-sm font-semibold truncate" style="color: #1B1B1B;" x-text="userName"></p><p class="text-xs truncate" style="color: #6E6E6E;" x-text="userEmail"></p></div><!-- Saldo highlight --><a href="https://ktitaniumbolt.com/dompet" class="flex items-center gap-3 px-4 py-3 mx-2 mt-2 mb-3 rounded-xl transition-colors" style="background: #FEF2F2; color: #1B1B1B;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='#FEF2F2'"><div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style="background: #FA0F00;"><i class="ph-bold ph-wallet text-base" style="color: white;"></i></div><div class="flex-1 min-w-0"><p class="text-[11px] font-medium uppercase tracking-wider" style="color: #6E6E6E;">Saldo Dompet</p><p class="text-sm font-bold truncate" style="color: #1B1B1B;" x-text="formatRupiah(walletBalance)"></p></div><i class="ph-bold ph-caret-right text-base" style="color: #6E6E6E;"></i></a><template x-if="isAdmin"><a href="https://ktitaniumbolt.com/admin" class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-[#F5F5F5]" style="color: #FA0F00; background: #FEF2F2;"><i class="ph-bold ph-gauge text-base" style="color: #FA0F00;"></i> Dashboard Admin</a></template><a href="https://ktitaniumbolt.com/akun" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;"><i class="ph-bold ph-user text-base" style="color: #6E6E6E;"></i> Akun Saya</a><a href="https://ktitaniumbolt.com/pesanan" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;"><i class="ph-bold ph-receipt text-base" style="color: #6E6E6E;"></i> Pesanan Saya</a><a href="https://ktitaniumbolt.com/dompet" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;"><i class="ph-bold ph-wallet text-base" style="color: #6E6E6E;"></i> Dompet Saya</a><a href="https://ktitaniumbolt.com/akun" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;"><i class="ph-bold ph-map-pin text-base" style="color: #6E6E6E;"></i> Alamat</a><div style="border-top: 1px solid #F0F0F0;" class="my-1"></div><button x-on:click="logout()" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #FA0F00;"><i class="ph-bold ph-sign-out text-base"></i> Keluar</button></div></template></div></div></div></div></div><!-- Category nav strip (Shopee-style sub nav) --><div class="hidden lg:block border-t" style="border-color: #F0F0F0; background: white;"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex items-center gap-6 h-10 text-[13px] overflow-x-auto" style="scrollbar-width: none;"><a href="../katalog.html" class="flex-shrink-0 transition-colors whitespace-nowrap " style="color: #1B1B1B;">Semua Kategori</a><a href="https://ktitaniumbolt.com/katalog?category=baut" class="flex-shrink-0 transition-colors whitespace-nowrap " style="color: #1B1B1B;">Baut</a><a href="https://ktitaniumbolt.com/katalog?category=mur" class="flex-shrink-0 transition-colors whitespace-nowrap " style="color: #1B1B1B;">Mur</a><a href="https://ktitaniumbolt.com/katalog?category=sekrup" class="flex-shrink-0 transition-colors whitespace-nowrap " style="color: #1B1B1B;">Sekrup</a><a href="https://ktitaniumbolt.com/katalog?category=anchor-angkur" class="flex-shrink-0 transition-colors whitespace-nowrap " style="color: #1B1B1B;">Anchor &amp; Angkur</a><a href="https://ktitaniumbolt.com/katalog?category=tools-aksesoris" class="flex-shrink-0 transition-colors whitespace-nowrap " style="color: #1B1B1B;">Tools &amp; Aksesoris</a><div class="flex-1"></div><a href="https://ktitaniumbolt.com/katalog?sort=sold_desc" class="flex-shrink-0 transition-colors flex items-center gap-1.5 whitespace-nowrap" style="color: #FA0F00;"><i class="ph-bold ph-fire text-base"></i><span>Best Seller</span></a></div></div></div></header><script>
+  // Explicit window assignment — see MobileMenu.astro for context.
+  window.shopeeHeader = function shopeeHeader() {
+    return {
+      isLoggedIn: false,
+      userName: '',
+      userEmail: '',
+      userRole: '',
+      isAdmin: false,
+      cartCount: 0,
+      unreadCount: 0,
+      walletBalance: 0,
+      async init() {
+        // cart/wallet/notifications are all login-only endpoints (no
+        // guest-cart feature exists) — firing them unconditionally on
+        // every page load meant every never-logged-in visitor got 3
+        // guaranteed 401s in the console on top of auth/me's own,
+        // logging as "errors" for something that isn't one (a guest
+        // correctly has no cart/wallet/notifications). Check auth FIRST
+        // and only load the rest when there's an actual session to load
+        // them for.
+        await this.checkAuth();
+        if (this.isLoggedIn) {
+          this.loadCartCount();
+          this.loadUnread();
+          this.loadWallet();
+        }
+        window.addEventListener('storage', async () => {
+          await this.checkAuth();
+          if (this.isLoggedIn) {
+            this.loadCartCount();
+            this.loadWallet();
+          }
+        });
+        window.addEventListener('cart-updated', () => this.loadCartCount());
+        window.addEventListener('notif-updated', () => this.loadUnread());
+        window.addEventListener('wallet-updated', () => this.loadWallet());
+      },
+      async loadWallet() {
+        try {
+          const res = await fetch('/api/v1/user/wallet', {
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include' });
+          if (!res.ok) { this.walletBalance = 0; return; }
+          const data = await res.json();
+          this.walletBalance = data.data?.balance ?? data.balance ?? 0;
+        } catch (e) { this.walletBalance = 0; }
+      },
+      formatRupiah(n) {
+        if (n == null) return 'Rp 0';
+        return 'Rp ' + Number(n).toLocaleString('id-ID');
+      },
+      async checkAuth() {
+        try {
+          const res = await fetch('/api/v1/auth/me', {
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include' });
+          // /auth/me is behind OptionalAuth now (2026-08-28) — it always
+          // returns 200, with data.user: null for a guest, instead of
+          // 401. "Not logged in" is read from that null below, not from
+          // the status code — a real non-2xx here now only ever means a
+          // genuine transient failure (rate limit, 5xx), so leave the
+          // existing state alone rather than treating it as a logout
+          // (a 2026-08-27 incident did exactly that off the old 401
+          // convention and made a rate-limit blip look like a real one).
+          if (!res.ok) return;
+          const data = await res.json();
+          const u = data?.data?.user ?? data?.user;
+          if (!u) { this.isLoggedIn = false; this.isAdmin = false; return; }
+          this.isLoggedIn = true;
+          this.userName = u.name || u.email || 'User';
+          this.userEmail = u.email || '';
+          this.userRole = u.role || 'customer';
+          this.isAdmin = ['super_admin', 'admin', 'operator', 'staff'].includes(this.userRole);
+        } catch (e) {
+          this.isLoggedIn = false;
+          this.isAdmin = false;
+        } finally {
+          // MobileMenu.astro used to run this exact same /auth/me fetch a
+          // second time on every page load (two Alpine components, both
+          // mounted regardless of viewport, each doing their own check) —
+          // for a guest that's 2 guaranteed 401s in the console instead
+          // of 1. It listens for this instead of fetching independently.
+          window.dispatchEvent(new CustomEvent('auth-checked', {
+            detail: {
+              isLoggedIn: this.isLoggedIn,
+              userName: this.userName,
+              userEmail: this.userEmail,
+              userRole: this.userRole,
+            },
+          }));
+        }
+      },
+      async loadCartCount() {
+        try {
+          const res = await fetch('/api/v1/cart/', {
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include' });
+          if (!res.ok) { this.cartCount = 0; return; }
+          const data = await res.json();
+          const items = data.data?.items || [];
+          this.cartCount = items.length;
+        } catch (e) { this.cartCount = 0; }
+      },
+      async loadUnread() {
+        try {
+          const res = await fetch('/api/v1/user/notifications/unread-count', {
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include' });
+          if (!res.ok) { this.unreadCount = 0; return; }
+          const data = await res.json();
+          this.unreadCount = data.data?.count || data.count || 0;
+        } catch (e) { this.unreadCount = 0; }
+      },
+      async logout() {
+        try {
+          await fetch('/api/v1/auth/logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include' });
+        } catch (e) { /* ignore */ }
+        this.isLoggedIn = false;
+        window.location.href = '/';
+      }
+    };
+  }
+
+  // Explicit window assignment — see MobileMenu.astro for context.
+  window.searchBar = function searchBar() {
+    return {
+      query: '',
+      results: [],
+      loading: false,
+      show: false,
+      init() {},
+      async search() {
+        if (this.query.length < 2) { this.results = []; this.show = false; return; }
+        this.loading = true;
+        this.show = true;
+        try {
+          const res = await fetch(`/api/v1/products?search=${encodeURIComponent(this.query)}&per_page=8`, {
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include' });
+          const data = await res.json();
+          this.results = data.data || [];
+        } catch (e) { this.results = []; }
+        finally { this.loading = false; }
+      },
+      goSearch() {
+        if (this.query.trim().length > 0) {
+          window.location.href = '/katalog?search=' + encodeURIComponent(this.query.trim());
+        }
+      },
+      formatRupiah(n) {
+        if (!n) return '';
+        return 'Rp ' + n.toLocaleString('id-ID');
+      }
+    };
+  }
+</script><div x-data="mobileMenuAuth()" x-on:open-mobile-menu.window="open = true" x-on:close-mobile-menu.window="open = false" x-show="open" x-cloak class="fixed inset-0 z-50 lg:hidden"><!-- Backdrop --><div class="fixed inset-0 bg-black/50 backdrop-blur-sm" x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-on:click="open = false"></div><!-- Menu --><div class="fixed inset-y-0 left-0 w-80 max-w-[85vw] shadow-2xl flex flex-col" style="background: white;" x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"><!-- Header --><div class="flex items-center justify-between p-4 border-b" style="border-color: #F0F0F0; background: #1B1B1B;"><a href="../index.html" class="flex items-center gap-2" x-on:click="open = false"><span class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: #FA0F00;"><i class="ph-bold ph-lightning text-xl" style="color: white;"></i></span><span class="font-bold text-base text-white">K Titanium Bolt</span></a><button type="button" class="p-2 rounded-lg transition-all active:scale-95" style="color: white;" x-on:click="open = false"><i class="ph-bold ph-x text-xl"></i></button></div><!-- Auth bar (top) --><div class="p-4 border-b" style="border-color: #F0F0F0; background: #F5F5F5;"><template x-if="!isLoggedIn"><div class="grid grid-cols-2 gap-2"><a href="baut-titanium-drat-10-panjang-15cm-m6x15-big-.html#" onclick="window.openLoginModal(); return false;" class="flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-semibold text-white transition-colors" style="background: #FA0F00;" onmouseover="this.style.background='#E00D00'" onmouseout="this.style.background='#FA0F00'" x-on:click="open = false"><i class="ph-bold ph-sign-in text-base"></i>Masuk</a><a href="https://ktitaniumbolt.com/daftar" class="flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-semibold transition-colors" style="background: white; color: #1B1B1B; border: 1px solid #D3D3D3;" x-on:click="open = false"><i class="ph-bold ph-user-plus text-base"></i>Daftar</a></div></template><template x-if="isLoggedIn"><a href="https://ktitaniumbolt.com/akun" class="flex items-center gap-3 p-2 rounded-lg" x-on:click="open = false"><div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: #FA0F00; color: white;"><i class="ph-bold ph-user text-lg"></i></div><div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate" style="color: #1B1B1B;" x-text="userName"></p><p class="text-xs truncate" style="color: #6E6E6E;">Lihat akun saya</p></div><i class="ph-bold ph-caret-right text-base" style="color: #6E6E6E;"></i></a></template><!-- Admin shortcut: placed at the TOP of the nav (right under
+           user info) so an admin on mobile never has to scroll to
+           find the dashboard. Single direct link, no nested submenu —
+           the /admin sidebar there has the full navigation. --><template x-if="isLoggedIn &amp;&amp; isAdmin"><a href="https://ktitaniumbolt.com/admin" class="mx-2 mt-2 flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors" style="background: #FEF2F2; color: #FA0F00;" x-on:click="open = false"><i class="ph-bold ph-squares-four text-base"></i>Admin Dashboard<i class="ph-bold ph-arrow-up-right ml-auto text-[10px] opacity-60"></i></a></template></div><!-- Search — the desktop header's search bar is lg:flex only, so
+         without this, mobile visitors had no text-search entry point
+         at all (only category links). Reuses the same window.searchBar
+         Alpine component/goSearch() target as the desktop bar. --><div class="p-3 border-b" style="border-color: #F0F0F0;" x-data="searchBar()"><div class="flex items-center w-full rounded-lg overflow-hidden" style="background: white; border: 2px solid #FA0F00;"><input type="text" x-model="query" x-on:keydown.enter="goSearch()" placeholder="Cari baut, mur, atau produk titanium..." class="flex-1 px-3 py-2.5 text-sm focus:outline-none min-w-0" style="color: #1B1B1B; background: white;"><button type="button" class="px-4 py-2.5 text-white flex-shrink-0" style="background: #FA0F00;" x-on:click="goSearch()"><i class="ph-bold ph-magnifying-glass text-lg"></i></button></div></div><!-- Categories + Links --><nav class="flex-1 overflow-y-auto p-2"><a href="../katalog.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = false"><i class="ph-bold ph-storefront text-lg" style="color: #6E6E6E;"></i>Semua Produk</a><a href="https://ktitaniumbolt.com/katalog?sort=sold_desc" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = false"><i class="ph-bold ph-fire text-lg" style="color: #FA0F00;"></i>Best Seller</a><div class="px-4 py-2 mt-2 text-[11px] font-semibold uppercase tracking-wider" style="color: #9E9E9E;">Kategori</div><a href="https://ktitaniumbolt.com/katalog?category=baut" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = false"><i class="ph-bold ph-folder text-base" style="color: #6E6E6E;"></i>Baut</a><a href="https://ktitaniumbolt.com/katalog?category=mur" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = false"><i class="ph-bold ph-folder text-base" style="color: #6E6E6E;"></i>Mur</a><a href="https://ktitaniumbolt.com/katalog?category=sekrup" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = false"><i class="ph-bold ph-folder text-base" style="color: #6E6E6E;"></i>Sekrup</a><a href="https://ktitaniumbolt.com/katalog?category=anchor-angkur" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = false"><i class="ph-bold ph-folder text-base" style="color: #6E6E6E;"></i>Anchor &amp; Angkur</a><a href="https://ktitaniumbolt.com/katalog?category=tools-aksesoris" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = false"><i class="ph-bold ph-folder text-base" style="color: #6E6E6E;"></i>Tools &amp; Aksesoris</a><div class="px-4 py-2 mt-2 text-[11px] font-semibold uppercase tracking-wider" style="color: #9E9E9E;">Lainnya</div><a href="../static/cara-belanja.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = false"><i class="ph-bold ph-question text-base" style="color: #6E6E6E;"></i>Cara Belanja</a><a href="../static/bantuan.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = false"><i class="ph-bold ph-headset text-base" style="color: #6E6E6E;"></i>Bantuan</a><a href="https://ktitaniumbolt.com/pesanan" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors hover:bg-[#F5F5F5]" style="color: #1B1B1B;" x-on:click="open = false"><i class="ph-bold ph-receipt text-base" style="color: #6E6E6E;"></i>Pesanan Saya</a></nav><!-- Logout (if logged in) --><template x-if="isLoggedIn"><div class="p-4 border-t" style="border-color: #F0F0F0;"><button x-on:click="logout()" class="w-full py-2.5 rounded-lg text-sm font-semibold transition-colors" style="background: white; color: #FA0F00; border: 1px solid #FA0F00;"><i class="ph-bold ph-sign-out"></i> Keluar</button></div></template></div></div><script>
+  // Explicit window assignment — Astro's `<script is:inline>` should run
+  // in global scope, but in some pipelines it ends up module-scoped which
+  // hides the function from window. Bind explicitly to be safe.
+  window.mobileMenuAuth = function mobileMenuAuth() {
+    return {
+      open: false,
+      isLoggedIn: false,
+      userName: '',
+      userEmail: '',
+      // Role from /api/v1/auth/me — used to surface the admin section
+      // in the menu. Customer accounts just see the standard
+      // storefront links; staff accounts also get a direct jump to the
+      // dashboard + analytics so they don't have to dig through
+      // deep-link URLs on a phone. Same role list as Header.astro's
+      // desktop isAdmin check — operator/staff were missing here, so
+      // those accounts saw the Admin Dashboard link on desktop but not
+      // on mobile.
+      userRole: '',
+      get isAdmin() {
+        return ['super_admin', 'admin', 'operator', 'staff'].includes(this.userRole);
+      },
+      init() {
+        // Header.astro's Alpine component already runs this exact same
+        // /api/v1/auth/me check on every page load — this component used
+        // to duplicate that fetch independently (both mount regardless
+        // of viewport), meaning a guest saw two 401s in the console for
+        // the same query instead of one. Listen for Header's result
+        // instead of asking again.
+        window.addEventListener('auth-checked', (e) => {
+          const detail = e.detail || {};
+          this.isLoggedIn = !!detail.isLoggedIn;
+          this.userName = detail.userName || '';
+          this.userEmail = detail.userEmail || '';
+          this.userRole = detail.userRole || '';
+        });
+      },
+      async logout() {
+        try {
+          await fetch('/api/v1/auth/logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include' });
+        } catch (e) { /* ignore */ }
+        this.isLoggedIn = false;
+        this.open = false;
+        window.location.href = '/';
+      }
+    };
+  }
+</script><main class="flex-1" data-astro-cid-npogderr><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[60vh]"><style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var g=Object.defineProperty;var w=(a,s,c)=>s in a?g(a,s,{enumerable:!0,configurable:!0,writable:!0,value:c}):a[s]=c;var l=(a,s,c)=>w(a,typeof s!="symbol"?s+"":s,c);var E=new Set(["__proto__","constructor","prototype"]);{let a={0:t=>y(t),1:t=>c(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(c(t)),5:t=>new Set(c(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>Number.POSITIVE_INFINITY*t},s=t=>{let[p,e]=t;return p in a?a[p](e):void 0},c=t=>t.map(s),y=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([p,e])=>[p,s(e)]));class f extends HTMLElement{constructor(){super(...arguments);l(this,"Component");l(this,"hydrator");l(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let r=this.querySelectorAll("astro-slot"),n={},d=this.querySelectorAll("template[data-astro-template]");for(let o of d){let i=o.closest(this.tagName);i!=null&&i.isSameNode(this)&&(n[o.getAttribute("data-astro-template")||"default"]=o.innerHTML,o.remove())}for(let o of r){let i=o.closest(this.tagName);i!=null&&i.isSameNode(this)&&(n[o.getAttribute("name")||"default"]=o.innerHTML)}let u;try{u=this.hasAttribute("props")?y(JSON.parse(this.getAttribute("props"))):{}}catch(o){let i=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(i+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${i}`,this.getAttribute("props"),o),o}let h;await this.hydrator(this)(this.Component,u,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});l(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),r.disconnect(),this.childrenConnectedCallback()},r=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});r.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}getRetryImportUrl(e){let r=new URL(e,document.baseURI);return r.searchParams.set("astro-retry",Date.now().toString()),r.toString()}async importWithRetry(e){try{return await import(e)}catch(r){return await new Promise(n=>setTimeout(n,1e3)),import(this.getRetryImportUrl(e))}}handleHydrationError(e){let r=this.getAttribute("component-url"),n=new CustomEvent("astro:hydration-error",{cancelable:!0,bubbles:!0,composed:!0,detail:{error:e,componentUrl:r}});this.dispatchEvent(n)&&console.error(`[astro-island] Error hydrating ${r}`,e)}async start(){let e=JSON.parse(this.getAttribute("opts")),r=this.getAttribute("client");if(Astro[r]===void 0){window.addEventListener(`astro:${r}`,()=>this.start(),{once:!0});return}try{await Astro[r](async()=>{let n=this.getAttribute("renderer-url");try{let[d,{default:u}]=await Promise.all([this.importWithRetry(this.getAttribute("component-url")),n?this.importWithRetry(n):Promise.resolve({default:()=>()=>{}})]),h=this.getAttribute("component-export")||"default";if(h.includes(".")){this.Component=d;for(let m of h.split(".")){if(E.has(m)||!this.Component||typeof this.Component!="object"&&typeof this.Component!="function"||!Object.hasOwn(this.Component,m))throw new Error(`Invalid component export path: ${h}`);this.Component=this.Component[m]}}else{if(E.has(h))throw new Error(`Invalid component export path: ${h}`);this.Component=d[h]}return this.hydrator=u,this.hydrate}catch(d){return this.handleHydrationError(d),()=>{}}},e,this)}catch(n){this.handleHydrationError(n)}}attributeChangedCallback(){this.hydrate()}}l(f,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",f)}})();</script><astro-island uid="ZFxQrd" prefix="r4" component-url="/_astro/ProductDetail.C4-RAptr.js" component-export="default" renderer-url="/_astro/client.7muciKCs.js" props="{&quot;product&quot;:[0,{&quot;id&quot;:[0,125],&quot;category_id&quot;:[0,1],&quot;category&quot;:[0,{&quot;id&quot;:[0,1],&quot;name&quot;:[0,&quot;Baut&quot;],&quot;slug&quot;:[0,&quot;baut&quot;],&quot;parent_id&quot;:[0,null],&quot;image_url&quot;:[0,null],&quot;sort_order&quot;:[0,1],&quot;is_active&quot;:[0,true],&quot;product_count&quot;:[0,0],&quot;created_at&quot;:[0,&quot;2026-05-09T15:05:50+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-05-09T15:05:50+07:00&quot;]}],&quot;name&quot;:[0,&quot;BAUT TITANIUM DRAT 10 PANJANG 1,5CM ( M6x15 BIG )&quot;],&quot;slug&quot;:[0,&quot;baut-titanium-drat-10-panjang-15cm-m6x15-big-&quot;],&quot;description&quot;:[0,&quot;READY BAUT TITANIUM M6HARGA DIATAS UNTUK 1 PCS ( 1 BIJI )&quot;],&quot;has_variants&quot;:[0,true],&quot;status&quot;:[0,&quot;active&quot;],&quot;is_featured&quot;:[0,false],&quot;aspect_ratio&quot;:[0,&quot;1:1&quot;],&quot;sold_count&quot;:[0,80],&quot;rating_avg&quot;:[0,0],&quot;review_count&quot;:[0,0],&quot;view_count&quot;:[0,165],&quot;weight_gram&quot;:[0,5],&quot;attributes&quot;:[1,[[0,{&quot;id&quot;:[0,235],&quot;product_id&quot;:[0,125],&quot;attribute_name&quot;:[0,&quot;Harga 1 pcs&quot;],&quot;values&quot;:[1,[[0,{&quot;id&quot;:[0,503],&quot;attribute_id&quot;:[0,235],&quot;value&quot;:[0,&quot;Blue purple&quot;],&quot;created_at&quot;:[0,&quot;2026-07-24T15:37:04.579+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-07-24T15:37:04.579+07:00&quot;]}]]],&quot;created_at&quot;:[0,&quot;2026-07-24T15:37:04.578+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-07-24T15:37:04.578+07:00&quot;]}]]],&quot;images&quot;:[1,[[0,{&quot;id&quot;:[0,357],&quot;product_id&quot;:[0,125],&quot;sku_id&quot;:[0,null],&quot;path&quot;:[0,null],&quot;image_url&quot;:[0,&quot;/uploads/products/125/nWu7anV3vKZQeZGc0JQn.jpeg&quot;],&quot;thumbnail_url&quot;:[0,&quot;/uploads/products/125/nWu7anV3vKZQeZGc0JQn.jpeg&quot;],&quot;sort_order&quot;:[0,1],&quot;is_primary&quot;:[0,true],&quot;media_type&quot;:[0,&quot;image&quot;],&quot;duration&quot;:[0,0],&quot;created_at&quot;:[0,&quot;2026-06-10T10:00:30+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-07-24T15:37:04.634+07:00&quot;]}]]],&quot;created_at&quot;:[0,&quot;2026-06-10T10:00:11+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-10-07T22:11:03.01+07:00&quot;],&quot;skus&quot;:[1,[[0,{&quot;id&quot;:[0,612],&quot;product_id&quot;:[0,125],&quot;sku_code&quot;:[0,&quot;Dinda04&quot;],&quot;base_price&quot;:[0,9000],&quot;stock&quot;:[0,99949],&quot;is_unlimited_stock&quot;:[0,true],&quot;weight_gram&quot;:[0,5],&quot;length_cm&quot;:[0,0],&quot;width_cm&quot;:[0,0],&quot;height_cm&quot;:[0,0],&quot;is_active&quot;:[0,true],&quot;variant_combination&quot;:[0,&quot;{\&quot;Harga 1 pcs\&quot;: \&quot;Blue purple\&quot;}&quot;],&quot;sort_order&quot;:[0,612],&quot;tiered_prices&quot;:[1,[[0,{&quot;id&quot;:[0,1792],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,20],&quot;price_per_unit&quot;:[0,8500],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.862+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.862+07:00&quot;]}],[0,{&quot;id&quot;:[0,1785],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,50],&quot;price_per_unit&quot;:[0,8250],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.859+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.859+07:00&quot;]}],[0,{&quot;id&quot;:[0,1786],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,100],&quot;price_per_unit&quot;:[0,8000],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.859+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.859+07:00&quot;]}],[0,{&quot;id&quot;:[0,1787],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,300],&quot;price_per_unit&quot;:[0,7750],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.86+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.86+07:00&quot;]}],[0,{&quot;id&quot;:[0,1788],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,500],&quot;price_per_unit&quot;:[0,7500],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.86+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.86+07:00&quot;]}],[0,{&quot;id&quot;:[0,1789],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,1000],&quot;price_per_unit&quot;:[0,7000],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.861+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.861+07:00&quot;]}],[0,{&quot;id&quot;:[0,1790],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,2000],&quot;price_per_unit&quot;:[0,6750],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.861+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.861+07:00&quot;]}],[0,{&quot;id&quot;:[0,1791],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,5000],&quot;price_per_unit&quot;:[0,6500],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.862+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.862+07:00&quot;]}]]],&quot;jubelio_item_id&quot;:[0,1058],&quot;jubelio_sku_id&quot;:[0,1058],&quot;jubelio_synced_at&quot;:[0,&quot;2026-08-07T03:12:43.142+07:00&quot;],&quot;created_at&quot;:[0,&quot;2026-07-19T23:59:33.036+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.855+07:00&quot;],&quot;attribute_name&quot;:[0,&quot;Harga 1 pcs&quot;],&quot;value_names&quot;:[1,[[0,&quot;Blue purple&quot;]]],&quot;variation_name&quot;:[0,&quot;Blue purple&quot;],&quot;min_order_qty&quot;:[0,20]}]]],&quot;wholesale_prices&quot;:[1,[[0,{&quot;id&quot;:[0,1792],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,20],&quot;price_per_unit&quot;:[0,8500],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.862+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.862+07:00&quot;]}],[0,{&quot;id&quot;:[0,1785],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,50],&quot;price_per_unit&quot;:[0,8250],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.859+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.859+07:00&quot;]}],[0,{&quot;id&quot;:[0,1786],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,100],&quot;price_per_unit&quot;:[0,8000],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.859+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.859+07:00&quot;]}],[0,{&quot;id&quot;:[0,1787],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,300],&quot;price_per_unit&quot;:[0,7750],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.86+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.86+07:00&quot;]}],[0,{&quot;id&quot;:[0,1788],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,500],&quot;price_per_unit&quot;:[0,7500],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.86+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.86+07:00&quot;]}],[0,{&quot;id&quot;:[0,1789],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,1000],&quot;price_per_unit&quot;:[0,7000],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.861+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.861+07:00&quot;]}],[0,{&quot;id&quot;:[0,1790],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,2000],&quot;price_per_unit&quot;:[0,6750],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.861+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.861+07:00&quot;]}],[0,{&quot;id&quot;:[0,1791],&quot;sku_id&quot;:[0,612],&quot;min_qty&quot;:[0,5000],&quot;price_per_unit&quot;:[0,6500],&quot;created_at&quot;:[0,&quot;2026-08-25T04:08:03.862+07:00&quot;],&quot;updated_at&quot;:[0,&quot;2026-08-25T04:08:03.862+07:00&quot;]}]]]}]}" ssr client="load" opts="{&quot;name&quot;:&quot;ProductDetail&quot;,&quot;value&quot;:true}" await-children><div class="lg:grid lg:grid-cols-2 lg:gap-8" aria-busy="true"><div><div class="aspect-square w-full rounded-2xl animate-pulse" style="background:#F0F0F0"></div><div class="grid grid-cols-4 gap-2 mt-3"><div class="aspect-square w-full rounded-xl animate-pulse" style="background:#F0F0F0"></div><div class="aspect-square w-full rounded-xl animate-pulse" style="background:#F0F0F0"></div><div class="aspect-square w-full rounded-xl animate-pulse" style="background:#F0F0F0"></div><div class="aspect-square w-full rounded-xl animate-pulse" style="background:#F0F0F0"></div></div></div><div class="space-y-4"><div class="h-4 w-24 rounded animate-pulse" style="background:#F0F0F0"></div><div class="h-8 w-3/4 rounded animate-pulse" style="background:#F0F0F0"></div><div class="h-6 w-1/3 rounded animate-pulse" style="background:#F0F0F0"></div><div class="space-y-2 mt-4"><div class="h-4 w-full rounded animate-pulse" style="background:#F0F0F0"></div><div class="h-4 w-5/6 rounded animate-pulse" style="background:#F0F0F0"></div><div class="h-4 w-4/6 rounded animate-pulse" style="background:#F0F0F0"></div></div><div class="flex gap-3 mt-6"><div class="h-12 w-32 rounded-xl animate-pulse" style="background:#F0F0F0"></div><div class="h-12 flex-1 rounded-xl animate-pulse" style="background:#F0F0F0"></div></div></div></div><!--astro:end--></astro-island><div id="ulasan" class="scroll-mt-24"><script>(()=>{var a=(s,i,o)=>{let r=async()=>{await(await s())()},t=typeof i.value=="object"?i.value:void 0,c={rootMargin:t==null?void 0:t.rootMargin},n=new IntersectionObserver(e=>{for(let l of e)if(l.isIntersecting){n.disconnect(),r();break}},c);for(let e of o.children)n.observe(e)};(self.Astro||(self.Astro={})).visible=a;window.dispatchEvent(new Event("astro:visible"));})();</script><astro-island uid="i134c" prefix="r5" component-url="/_astro/ProductReviews.Dk_7LA9-.js" component-export="default" renderer-url="/_astro/client.7muciKCs.js" props="{&quot;productId&quot;:[0,125],&quot;productSlug&quot;:[0,&quot;baut-titanium-drat-10-panjang-15cm-m6x15-big-&quot;]}" ssr client="visible" opts="{&quot;name&quot;:&quot;ProductReviews&quot;,&quot;value&quot;:true}" await-children><section id="ulasan" class="mt-10 scroll-mt-24"><h2 class="text-lg font-bold mb-4" style="color:#1B1B1B">Ulasan Produk</h2><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"><div class="rounded-2xl p-6" style="background:white;border:1px solid #D3D3D3"><div class="text-4xl font-bold" style="color:#1B1B1B">0.0</div><span style="display:inline-flex;gap:1px"><i class="ph-fill ph-star" style="font-size:16px;color:#D3D3D3"></i><i class="ph-fill ph-star" style="font-size:16px;color:#D3D3D3"></i><i class="ph-fill ph-star" style="font-size:16px;color:#D3D3D3"></i><i class="ph-fill ph-star" style="font-size:16px;color:#D3D3D3"></i><i class="ph-fill ph-star" style="font-size:16px;color:#D3D3D3"></i></span><p class="text-sm mt-1" style="color:#6E6E6E">0<!-- --> ulasan</p><div class="mt-4 space-y-1.5"><button class="w-full flex items-center gap-2 text-xs" style="color:#6E6E6E"><span class="w-8 text-right">5<!-- -->★</span><span class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:#F5F5F5"><span class="block h-full rounded-full" style="width:0%;background:#F59E0B"></span></span><span class="w-6">0</span></button><button class="w-full flex items-center gap-2 text-xs" style="color:#6E6E6E"><span class="w-8 text-right">4<!-- -->★</span><span class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:#F5F5F5"><span class="block h-full rounded-full" style="width:0%;background:#F59E0B"></span></span><span class="w-6">0</span></button><button class="w-full flex items-center gap-2 text-xs" style="color:#6E6E6E"><span class="w-8 text-right">3<!-- -->★</span><span class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:#F5F5F5"><span class="block h-full rounded-full" style="width:0%;background:#F59E0B"></span></span><span class="w-6">0</span></button><button class="w-full flex items-center gap-2 text-xs" style="color:#6E6E6E"><span class="w-8 text-right">2<!-- -->★</span><span class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:#F5F5F5"><span class="block h-full rounded-full" style="width:0%;background:#F59E0B"></span></span><span class="w-6">0</span></button><button class="w-full flex items-center gap-2 text-xs" style="color:#6E6E6E"><span class="w-8 text-right">1<!-- -->★</span><span class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:#F5F5F5"><span class="block h-full rounded-full" style="width:0%;background:#F59E0B"></span></span><span class="w-6">0</span></button></div><a href="https://ktitaniumbolt.com/masuk?next=%2Fkatalog%2Fbaut-titanium-drat-10-panjang-15cm-m6x15-big-%23ulasan" class="mt-5 block w-full py-2.5 rounded-xl text-sm font-semibold text-center" style="border:1px solid #D3D3D3;color:#1B1B1B">Masuk untuk mengulas</a></div><div class="md:col-span-2"><p class="text-sm py-8 text-center" style="color:#6E6E6E">Memuat ulasan...</p></div></div></section><!--astro:end--></astro-island></div><astro-island uid="qSKMH" prefix="r6" component-url="/_astro/RelatedProducts.CWymUXYa.js" component-export="default" renderer-url="/_astro/client.7muciKCs.js" props="{&quot;relatedProducts&quot;:[1,[[0,{&quot;id&quot;:[0,117],&quot;name&quot;:[0,&quot;HENG BAUT M6x15 MOTIF PAYUNG UMBRELLA / PIRAMID CEMBUNG&quot;],&quot;slug&quot;:[0,&quot;heng-baut-m6x15-motif-payung-umbrella-piramid-cembung&quot;],&quot;status&quot;:[0,&quot;active&quot;],&quot;is_featured&quot;:[0,false],&quot;has_variants&quot;:[0,false],&quot;aspect_ratio&quot;:[0,&quot;1:1&quot;],&quot;primary_image&quot;:[0,&quot;/uploads/products/117/7Nov0XAplcarQWpeOaMR.jpeg&quot;],&quot;min_price&quot;:[0,7500],&quot;max_price&quot;:[0,7500],&quot;discount_percent&quot;:[0,0],&quot;total_stock&quot;:[0,0],&quot;min_variant_stock&quot;:[0,0],&quot;unavailable_variants&quot;:[0,0],&quot;has_unlimited_sku&quot;:[0,true],&quot;has_wholesale&quot;:[0,true],&quot;min_wholesale_price&quot;:[0,5750],&quot;sold_count&quot;:[0,520],&quot;rating_avg&quot;:[0,0],&quot;review_count&quot;:[0,0],&quot;view_count&quot;:[0,71],&quot;created_at&quot;:[0,&quot;2026-06-10 10:00:11&quot;],&quot;updated_at&quot;:[0,&quot;2026-10-01 16:23:35&quot;],&quot;skus&quot;:[1,[[0,{&quot;id&quot;:[0,134],&quot;sku_code&quot;:[0,&quot;Heng6x15piramidcembung&quot;],&quot;base_price&quot;:[0,7500],&quot;stock&quot;:[0,0],&quot;is_unlimited_stock&quot;:[0,true],&quot;min_order_qty&quot;:[0,1],&quot;is_active&quot;:[0,true]}]]]}],[0,{&quot;id&quot;:[0,127],&quot;name&quot;:[0,&quot;HENG BAUT BODY YAMAHA PIRAMID CEMBUNG&quot;],&quot;slug&quot;:[0,&quot;heng-baut-body-yamaha-piramid-cembung&quot;],&quot;status&quot;:[0,&quot;active&quot;],&quot;is_featured&quot;:[0,false],&quot;has_variants&quot;:[0,false],&quot;aspect_ratio&quot;:[0,&quot;1:1&quot;],&quot;primary_image&quot;:[0,&quot;/uploads/products/127/MP40ZI5nFUQXsQOUADmv.jpeg&quot;],&quot;min_price&quot;:[0,5500],&quot;max_price&quot;:[0,5500],&quot;discount_percent&quot;:[0,0],&quot;total_stock&quot;:[0,0],&quot;min_variant_stock&quot;:[0,0],&quot;unavailable_variants&quot;:[0,0],&quot;has_unlimited_sku&quot;:[0,true],&quot;has_wholesale&quot;:[0,true],&quot;min_wholesale_price&quot;:[0,4750],&quot;sold_count&quot;:[0,60],&quot;rating_avg&quot;:[0,0],&quot;review_count&quot;:[0,0],&quot;view_count&quot;:[0,41],&quot;created_at&quot;:[0,&quot;2026-06-10 10:00:11&quot;],&quot;updated_at&quot;:[0,&quot;2026-10-06 11:56:32&quot;],&quot;skus&quot;:[1,[[0,{&quot;id&quot;:[0,144],&quot;sku_code&quot;:[0,&quot;Hengbodypiramid&quot;],&quot;base_price&quot;:[0,5500],&quot;stock&quot;:[0,0],&quot;is_unlimited_stock&quot;:[0,true],&quot;min_order_qty&quot;:[0,1],&quot;is_active&quot;:[0,true]}]]]}],[0,{&quot;id&quot;:[0,130],&quot;name&quot;:[0,&quot;Heng baut 2kunci M6x20 stainless  drat 10 panjang 2cm original heng thailand&quot;],&quot;slug&quot;:[0,&quot;heng-baut-2kunci-m6x20-stainless-drat-10-panjang-2cm-original-heng-thailand&quot;],&quot;status&quot;:[0,&quot;active&quot;],&quot;is_featured&quot;:[0,false],&quot;has_variants&quot;:[0,false],&quot;aspect_ratio&quot;:[0,&quot;1:1&quot;],&quot;primary_image&quot;:[0,&quot;/uploads/products/130/5XCiPK7Xd8oq7PTV7mN0.jpeg&quot;],&quot;min_price&quot;:[0,6500],&quot;max_price&quot;:[0,6500],&quot;discount_percent&quot;:[0,0],&quot;total_stock&quot;:[0,0],&quot;min_variant_stock&quot;:[0,0],&quot;unavailable_variants&quot;:[0,0],&quot;has_unlimited_sku&quot;:[0,true],&quot;has_wholesale&quot;:[0,true],&quot;min_wholesale_price&quot;:[0,5250],&quot;sold_count&quot;:[0,520],&quot;rating_avg&quot;:[0,0],&quot;review_count&quot;:[0,0],&quot;view_count&quot;:[0,25],&quot;created_at&quot;:[0,&quot;2026-06-10 10:00:11&quot;],&quot;updated_at&quot;:[0,&quot;2026-10-03 13:59:10&quot;],&quot;skus&quot;:[1,[[0,{&quot;id&quot;:[0,147],&quot;sku_code&quot;:[0,&quot;Heng6x20&quot;],&quot;base_price&quot;:[0,6500],&quot;stock&quot;:[0,0],&quot;is_unlimited_stock&quot;:[0,true],&quot;min_order_qty&quot;:[0,1],&quot;is_active&quot;:[0,true]}]]]}],[0,{&quot;id&quot;:[0,133],&quot;name&quot;:[0,&quot;BAUT DRAT 6 PANJANG 1,5CM ( M4X15 BIG )&quot;],&quot;slug&quot;:[0,&quot;baut-drat-6-panjang-15cm-m4x15-big-&quot;],&quot;status&quot;:[0,&quot;active&quot;],&quot;is_featured&quot;:[0,false],&quot;has_variants&quot;:[0,true],&quot;aspect_ratio&quot;:[0,&quot;1:1&quot;],&quot;primary_image&quot;:[0,&quot;/uploads/products/133/txg8gFEDS4d3QKf4wynv.jpeg&quot;],&quot;min_price&quot;:[0,9000],&quot;max_price&quot;:[0,9000],&quot;discount_percent&quot;:[0,0],&quot;total_stock&quot;:[0,0],&quot;min_variant_stock&quot;:[0,0],&quot;unavailable_variants&quot;:[0,0],&quot;has_unlimited_sku&quot;:[0,true],&quot;has_wholesale&quot;:[0,true],&quot;min_wholesale_price&quot;:[0,7000],&quot;sold_count&quot;:[0,0],&quot;rating_avg&quot;:[0,0],&quot;review_count&quot;:[0,0],&quot;view_count&quot;:[0,36],&quot;created_at&quot;:[0,&quot;2026-06-10 10:00:11&quot;],&quot;updated_at&quot;:[0,&quot;2026-10-06 12:59:14&quot;],&quot;skus&quot;:[1,[[0,{&quot;id&quot;:[0,598],&quot;sku_code&quot;:[0,&quot;Dinda09&quot;],&quot;base_price&quot;:[0,9000],&quot;stock&quot;:[0,0],&quot;is_unlimited_stock&quot;:[0,true],&quot;min_order_qty&quot;:[0,1],&quot;is_active&quot;:[0,true]}]]]}]]]}" ssr client="visible" opts="{&quot;name&quot;:&quot;RelatedProducts&quot;,&quot;value&quot;:true}" await-children><div class="mt-12 pt-8" style="border-top:1px solid #D3D3D3"><h2 class="text-xl font-bold mb-4" style="color:#1B1B1B">Produk Terkait</h2><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"><a href="heng-baut-m6x15-motif-payung-umbrella-piramid-cembung.html" class="group relative block rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5" style="background:#ffffff;border:1px solid #D3D3D3"><button type="button" data-wishlist-heart="true" data-product-id="117" data-saved="false" aria-label="Simpan HENG BAUT M6x15 MOTIF PAYUNG UMBRELLA / PIRAMID CEMBUNG ke wishlist" aria-pressed="false" title="Simpan ke wishlist" class="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center" style="background:rgba(255,255,255,0.92);color:#1B1B1B"><i class="ph-bold ph-heart text-sm"></i></button><div class="aspect-square overflow-hidden relative product-image-skeleton" style="background:#F5F5F5"><img src="../uploads/products/117/7Nov0XAplcarQWpeOaMR.jpeg" alt="HENG BAUT M6x15 MOTIF PAYUNG UMBRELLA / PIRAMID CEMBUNG" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 absolute inset-0" style="opacity:0;transition:opacity 400ms ease-out" loading="lazy"/></div><div class="p-3"><p class="text-sm font-medium line-clamp-2 mb-2" style="color:#1B1B1B;min-height:2.5rem">HENG BAUT M6x15 MOTIF PAYUNG UMBRELLA / PIRAMID CEMBUNG</p><p class="text-base font-bold" style="color:#FA0F00">Rp 7.500</p><p class="text-xs mt-1 inline-flex items-center gap-1" style="color:#008000"><i class="ph-bold ph-truck"></i> Siap kirim</p></div></a><a href="heng-baut-body-yamaha-piramid-cembung.html" class="group relative block rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5" style="background:#ffffff;border:1px solid #D3D3D3"><button type="button" data-wishlist-heart="true" data-product-id="127" data-saved="false" aria-label="Simpan HENG BAUT BODY YAMAHA PIRAMID CEMBUNG ke wishlist" aria-pressed="false" title="Simpan ke wishlist" class="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center" style="background:rgba(255,255,255,0.92);color:#1B1B1B"><i class="ph-bold ph-heart text-sm"></i></button><div class="aspect-square overflow-hidden relative product-image-skeleton" style="background:#F5F5F5"><img src="../uploads/products/127/MP40ZI5nFUQXsQOUADmv.jpeg" alt="HENG BAUT BODY YAMAHA PIRAMID CEMBUNG" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 absolute inset-0" style="opacity:0;transition:opacity 400ms ease-out" loading="lazy"/></div><div class="p-3"><p class="text-sm font-medium line-clamp-2 mb-2" style="color:#1B1B1B;min-height:2.5rem">HENG BAUT BODY YAMAHA PIRAMID CEMBUNG</p><p class="text-base font-bold" style="color:#FA0F00">Rp 5.500</p><p class="text-xs mt-1 inline-flex items-center gap-1" style="color:#008000"><i class="ph-bold ph-truck"></i> Siap kirim</p></div></a><a href="heng-baut-2kunci-m6x20-stainless-drat-10-panjang-2cm-original-heng-thailand.html" class="group relative block rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5" style="background:#ffffff;border:1px solid #D3D3D3"><button type="button" data-wishlist-heart="true" data-product-id="130" data-saved="false" aria-label="Simpan Heng baut 2kunci M6x20 stainless  drat 10 panjang 2cm original heng thailand ke wishlist" aria-pressed="false" title="Simpan ke wishlist" class="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center" style="background:rgba(255,255,255,0.92);color:#1B1B1B"><i class="ph-bold ph-heart text-sm"></i></button><div class="aspect-square overflow-hidden relative product-image-skeleton" style="background:#F5F5F5"><img src="../uploads/products/130/5XCiPK7Xd8oq7PTV7mN0.jpeg" alt="Heng baut 2kunci M6x20 stainless  drat 10 panjang 2cm original heng thailand" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 absolute inset-0" style="opacity:0;transition:opacity 400ms ease-out" loading="lazy"/></div><div class="p-3"><p class="text-sm font-medium line-clamp-2 mb-2" style="color:#1B1B1B;min-height:2.5rem">Heng baut 2kunci M6x20 stainless  drat 10 panjang 2cm original heng thailand</p><p class="text-base font-bold" style="color:#FA0F00">Rp 6.500</p><p class="text-xs mt-1 inline-flex items-center gap-1" style="color:#008000"><i class="ph-bold ph-truck"></i> Siap kirim</p></div></a><a href="baut-drat-6-panjang-15cm-m4x15-big-.html" class="group relative block rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5" style="background:#ffffff;border:1px solid #D3D3D3"><button type="button" data-wishlist-heart="true" data-product-id="133" data-saved="false" aria-label="Simpan BAUT DRAT 6 PANJANG 1,5CM ( M4X15 BIG ) ke wishlist" aria-pressed="false" title="Simpan ke wishlist" class="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center" style="background:rgba(255,255,255,0.92);color:#1B1B1B"><i class="ph-bold ph-heart text-sm"></i></button><div class="aspect-square overflow-hidden relative product-image-skeleton" style="background:#F5F5F5"><img src="../uploads/products/133/txg8gFEDS4d3QKf4wynv.jpeg" alt="BAUT DRAT 6 PANJANG 1,5CM ( M4X15 BIG )" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 absolute inset-0" style="opacity:0;transition:opacity 400ms ease-out" loading="lazy"/></div><div class="p-3"><p class="text-sm font-medium line-clamp-2 mb-2" style="color:#1B1B1B;min-height:2.5rem">BAUT DRAT 6 PANJANG 1,5CM ( M4X15 BIG )</p><p class="text-base font-bold" style="color:#FA0F00">Rp 9.000</p><p class="text-xs mt-1 inline-flex items-center gap-1" style="color:#008000"><i class="ph-bold ph-truck"></i> Siap kirim</p></div></a></div></div><!--astro:end--></astro-island><astro-island uid="Z17YSJI" prefix="r7" component-url="/_astro/RecentlyViewed.x1VuuDvS.js" component-export="default" renderer-url="/_astro/client.7muciKCs.js" props="{&quot;productId&quot;:[0,125]}" ssr client="load" opts="{&quot;name&quot;:&quot;RecentlyViewed&quot;,&quot;value&quot;:true}"></astro-island></div></main><footer style="background: white; border-top: 4px solid #FA0F00;"><!-- Main footer content --><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8"><!-- Brand + Address (Shopee-style left block) --><div class="lg:col-span-4"><div class="flex items-center gap-3 mb-4"><img src="../images/logo.jpeg" alt="K Titanium Bolt" class="h-10 w-auto" decoding="async" loading="lazy" width="135" height="50"><div><p class="text-base font-bold" style="color: #1B1B1B;">K Titanium Bolt</p><p class="text-xs" style="color: #6E6E6E;"> Baut & Produk Titanium Gr5 </p></div></div><p class="text-sm leading-relaxed mb-4" style="color: #6E6E6E;">Supplier baut, mur, dan produk titanium grade 5 berkualitas premium untuk otomotif, industri, dan custom. Pengiriman ke seluruh Indonesia.</p><div class="space-y-1.5 text-xs" style="color: #6E6E6E;"><div class="flex items-start gap-2"><i class="ph-bold ph-map-pin text-base flex-shrink-0 mt-0.5" style="color: #FA0F00;"></i><span>Jl. Kol Ahmad Syam Kampung Tangkil RT 2 RW 5, Kel. Katulampa, Kec. Bogor Timur, Kota Bogor 16144</span></div><div class="flex items-start gap-2"><i class="ph-bold ph-phone text-base flex-shrink-0 mt-0.5" style="color: #FA0F00;"></i><div><a href="tel:+6281998315468" class="font-semibold hover:text-[#FA0F00] transition-colors" style="color: #1B1B1B;">+62 819-9831-5468</a><p class="text-[11px] mt-0.5" style="color: #9E9E9E;">Senin–Sabtu, 09.00–18.00 WIB</p></div></div><div class="flex items-center gap-2"><i class="ph-bold ph-envelope-simple text-base flex-shrink-0" style="color: #FA0F00;"></i><a href="https://ktitaniumbolt.com/cdn-cgi/l/email-protection#620d0c07091112070706110a0d1222050f030b0e4c010d0f" class="hover:text-[#FA0F00] transition-colors"><span class="__cf_email__" data-cfemail="7c131219170f0c1919180f14130c3c1b111d1510521f1311">[email&#160;protected]</span></a></div></div></div><!-- Customer Service --><div class="lg:col-span-2"><h3 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: #1B1B1B;">Layanan Pelanggan</h3><ul class="space-y-2.5"><li><a href="../static/cara-belanja.html" class="text-sm hover:text-[#FA0F00] transition-colors" style="color: #6E6E6E;">Cara Belanja</a></li><li><a href="../static/bantuan.html" class="text-sm hover:text-[#FA0F00] transition-colors" style="color: #6E6E6E;">Bantuan</a></li><li><a href="../static/faq.html" class="text-sm hover:text-[#FA0F00] transition-colors" style="color: #6E6E6E;">FAQ</a></li><li><a href="../static/kontak.html" class="text-sm hover:text-[#FA0F00] transition-colors" style="color: #6E6E6E;">Kontak Kami</a></li></ul></div><!-- About Us --><div class="lg:col-span-2"><h3 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: #1B1B1B;">Tentang Kami</h3><ul class="space-y-2.5"><li><a href="../static/tentang.html" class="text-sm hover:text-[#FA0F00] transition-colors" style="color: #6E6E6E;">Tentang K Titanium</a></li><li><a href="https://ktitaniumbolt.com/static/kebijakan-privasi" class="text-sm hover:text-[#FA0F00] transition-colors" style="color: #6E6E6E;">Kebijakan Privasi</a></li><li><a href="https://ktitaniumbolt.com/static/refund-policy" class="text-sm hover:text-[#FA0F00] transition-colors" style="color: #6E6E6E;">Kebijakan Pengembalian</a></li><li><a href="../static/kebijakan-pengiriman.html" class="text-sm hover:text-[#FA0F00] transition-colors" style="color: #6E6E6E;">Kebijakan Pengiriman</a></li><li><a href="../static/syarat-ketentuan.html" class="text-sm hover:text-[#FA0F00] transition-colors" style="color: #6E6E6E;">Syarat &amp; Ketentuan</a></li><li><a href="https://ktitaniumbolt.com/static/hapus-akun" class="text-sm hover:text-[#FA0F00] transition-colors" style="color: #6E6E6E;">Hapus Akun</a></li></ul></div><!-- Follow Us + Socials --><div class="lg:col-span-4"><h3 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: #1B1B1B;">Ikuti Kami</h3><div class="flex flex-wrap items-center gap-2 mb-6"><a href="https://instagram.com/ktitanium" target="_blank" rel="noopener" title="Instagram" class="group inline-flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" style="background: #F5F5F5; border: 1px solid #E8E8E8;" onmouseover="this.style.background='#E1306C'; this.style.borderColor='#E1306C'" onmouseout="this.style.background='#F5F5F5'; this.style.borderColor='#E8E8E8'"><i class="ph-bold ph-instagram-logo text-lg" style="color: #1B1B1B;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#1B1B1B'"></i></a><a href="https://facebook.com/ktitanium" target="_blank" rel="noopener" title="Facebook" class="group inline-flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" style="background: #F5F5F5; border: 1px solid #E8E8E8;" onmouseover="this.style.background='#1877F2'; this.style.borderColor='#1877F2'" onmouseout="this.style.background='#F5F5F5'; this.style.borderColor='#E8E8E8'"><i class="ph-bold ph-facebook-logo text-lg" style="color: #1B1B1B;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#1B1B1B'"></i></a><a href="https://tiktok.com/@ktitanium" target="_blank" rel="noopener" title="TikTok" class="group inline-flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" style="background: #F5F5F5; border: 1px solid #E8E8E8;" onmouseover="this.style.background='#000000'; this.style.borderColor='#000000'" onmouseout="this.style.background='#F5F5F5'; this.style.borderColor='#E8E8E8'"><i class="ph-bold ph-tiktok-logo text-lg" style="color: #1B1B1B;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#1B1B1B'"></i></a><a href="https://youtube.com/@ktitanium" target="_blank" rel="noopener" title="YouTube" class="group inline-flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" style="background: #F5F5F5; border: 1px solid #E8E8E8;" onmouseover="this.style.background='#FF0000'; this.style.borderColor='#FF0000'" onmouseout="this.style.background='#F5F5F5'; this.style.borderColor='#E8E8E8'"><i class="ph-bold ph-youtube-logo text-lg" style="color: #1B1B1B;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#1B1B1B'"></i></a><a href="https://twitter.com/ktitanium" target="_blank" rel="noopener" title="X" class="group inline-flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" style="background: #F5F5F5; border: 1px solid #E8E8E8;" onmouseover="this.style.background='#000000'; this.style.borderColor='#000000'" onmouseout="this.style.background='#F5F5F5'; this.style.borderColor='#E8E8E8'"><i class="ph-bold ph-x-logo text-lg" style="color: #1B1B1B;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#1B1B1B'"></i></a></div><!-- WhatsApp CTA --><a href="https://wa.me/6281998315468?text=Halo%20K%20Titanium%20Bolt%2C%20saya%20mau%20tanya%20soal%20produk" target="_blank" rel="noopener" class="group block p-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md" style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid #BBF7D0;"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: #16A34A;"><i class="ph-bold ph-whatsapp-logo text-xl text-white"></i></div><div class="min-w-0"><p class="text-sm font-bold" style="color: #15803D;">Chat WhatsApp CS</p><p class="text-[11px] truncate" style="color: #6E6E6E;">+62 819-9831-5468</p></div></div><p class="text-[11px] mt-2 leading-snug" style="color: #6E6E6E;">Respon cepat hari kerja 09.00–18.00 WIB. Pesan di luar jam akan dibalas pagi berikutnya.</p></a></div></div><!-- Payment + Shipping strip --><div class="mt-10 pt-6 grid grid-cols-1 lg:grid-cols-12 gap-6" style="border-top: 1px solid #F0F0F0;"><!-- Payment --><div class="lg:col-span-7"><h3 class="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-2" style="color: #1B1B1B;"><i class="ph-bold ph-credit-card text-base" style="color: #FA0F00;"></i>Metode Pembayaran</h3><div class="flex flex-wrap items-center gap-2"><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:scale-105 cursor-default" style="background: white; color: #1B1B1B; border: 1px solid #E0E0E0;">BCA</span><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:scale-105 cursor-default" style="background: white; color: #1B1B1B; border: 1px solid #E0E0E0;">BNI</span><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:scale-105 cursor-default" style="background: white; color: #1B1B1B; border: 1px solid #E0E0E0;">BRI</span><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:scale-105 cursor-default" style="background: white; color: #1B1B1B; border: 1px solid #E0E0E0;">Mandiri</span><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:scale-105 cursor-default" style="background: white; color: #1B1B1B; border: 1px solid #E0E0E0;">DANA</span><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:scale-105 cursor-default" style="background: white; color: #1B1B1B; border: 1px solid #E0E0E0;">OVO</span><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:scale-105 cursor-default" style="background: white; color: #1B1B1B; border: 1px solid #E0E0E0;">GoPay</span><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:scale-105 cursor-default" style="background: white; color: #1B1B1B; border: 1px solid #E0E0E0;">ShopeePay</span><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:scale-105 cursor-default" style="background: white; color: #1B1B1B; border: 1px solid #E0E0E0;">QRIS</span><!-- Bayar di Tempat (COD) — real badge asset instead of a text
+               pill, matches how Shopee/Tokopedia surface COD as its own
+               visual mark rather than just another payment-channel label. --><span class="inline-flex items-center justify-center cursor-default transition-all hover:scale-105" title="Bayar di Tempat (COD)"><img src="../images/badges/cod-truck.webp" alt="Bayar di Tempat (COD)" class="h-9 w-auto" decoding="async" loading="lazy"></span></div></div><!-- Shipping --><div class="lg:col-span-5"><h3 class="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-2" style="color: #1B1B1B;"><i class="ph-bold ph-truck text-base" style="color: #FA0F00;"></i>Jasa Pengiriman</h3><div class="flex flex-wrap items-center gap-2"><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-white cursor-default transition-all hover:scale-105" style="border: 1px solid #E0E0E0;" title="JNE"><img src="../images/couriers/jne.svg" alt="JNE" class="h-5 w-auto" decoding="async" loading="lazy"></span><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-white cursor-default transition-all hover:scale-105" style="border: 1px solid #E0E0E0;" title="J&amp;T"><img src="../images/couriers/jnt.svg" alt="J&amp;T" class="h-5 w-auto" decoding="async" loading="lazy"></span><span class="inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-white cursor-default transition-all hover:scale-105" style="border: 1px solid #E0E0E0;" title="J&amp;T Cargo"><img src="../images/couriers/jnt-cargo.svg" alt="J&amp;T Cargo" class="h-5 w-auto" decoding="async" loading="lazy"></span></div></div></div></div><!-- Copyright bar --><div style="background: #F5F5F5; border-top: 1px solid #E8E8E8;"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4"><div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs" style="color: #6E6E6E;"><p>&copy; 2026 K Titanium Bolt. All rights reserved.</p><p>Powered by <span class="font-semibold" style="color: #FA0F00;">K Titanium Bolt</span></p></div></div></div></footer></div><a href="https://wa.me/6281998315468?text=Halo%20K%20Titanium%20Bolt%2C%20saya%20butuh%20bantuan." target="_blank" rel="noopener noreferrer" aria-label="Chat WhatsApp CS K Titanium Bolt" class="cs-whatsapp-fab group" data-astro-cid-npogderr><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="40" height="40" viewBox="0 0 48 48" aria-hidden="true" data-astro-cid-npogderr><path fill="#fff" d="M4.868,43.303l2.694-9.835C5.9,30.59,5.026,27.324,5.027,23.979C5.032,13.514,13.548,5,24.014,5c5.079,0.002,9.845,1.979,13.43,5.566c3.584,3.588,5.558,8.356,5.556,13.428c-0.004,10.465-8.522,18.98-18.986,18.98c-0.001,0,0,0,0,0h-0.008c-3.177-0.001-6.3-0.798-9.073-2.311L4.868,43.303z" data-astro-cid-npogderr></path><path fill="#fff" d="M4.868,43.803c-0.132,0-0.26-0.052-0.355-0.148c-0.125-0.127-0.174-0.312-0.127-0.483l2.639-9.636c-1.636-2.906-2.499-6.206-2.497-9.556C4.532,13.238,13.273,4.5,24.014,4.5c5.21,0.002,10.105,2.031,13.784,5.713c3.679,3.683,5.704,8.577,5.702,13.781c-0.004,10.741-8.746,19.48-19.486,19.48c-3.189-0.001-6.344-0.788-9.144-2.277l-9.875,2.589C4.953,43.798,4.911,43.803,4.868,43.803z" data-astro-cid-npogderr></path><path fill="#cfd8dc" d="M24.014,5c5.079,0.002,9.845,1.979,13.43,5.566c3.584,3.588,5.558,8.356,5.556,13.428c-0.004,10.465-8.522,18.98-18.986,18.98h-0.008c-3.177-0.001-6.3-0.798-9.073-2.311L4.868,43.303l2.694-9.835C5.9,30.59,5.026,27.324,5.027,23.979C5.032,13.514,13.548,5,24.014,5 M24.014,42.974C24.014,42.974,24.014,42.974,24.014,42.974C24.014,42.974,24.014,42.974,24.014,42.974 M24.014,42.974C24.014,42.974,24.014,42.974,24.014,42.974C24.014,42.974,24.014,42.974,24.014,42.974 M24.014,4C24.014,4,24.014,4,24.014,4C12.998,4,4.032,12.962,4.027,23.979c-0.001,3.367,0.849,6.685,2.461,9.622l-2.585,9.439c-0.094,0.345,0.002,0.713,0.254,0.967c0.19,0.192,0.447,0.297,0.711,0.297c0.085,0,0.17-0.011,0.254-0.033l9.687-2.54c2.828,1.468,5.998,2.243,9.197,2.244c11.024,0,19.99-8.963,19.995-19.98c0.002-5.339-2.075-10.359-5.848-14.135C34.378,6.083,29.357,4.002,24.014,4L24.014,4z" data-astro-cid-npogderr></path><path fill="#40c351" d="M35.176,12.832c-2.98-2.982-6.941-4.625-11.157-4.626c-8.704,0-15.783,7.076-15.787,15.774c-0.001,2.981,0.833,5.883,2.413,8.396l0.376,0.597l-1.595,5.821l5.973-1.566l0.577,0.342c2.422,1.438,5.2,2.198,8.032,2.199h0.006c8.698,0,15.777-7.077,15.78-15.776C39.795,19.778,38.156,15.814,35.176,12.832z" data-astro-cid-npogderr></path><path fill="#fff" fill-rule="evenodd" d="M19.268,16.045c-0.355-0.79-0.729-0.806-1.068-0.82c-0.277-0.012-0.593-0.011-0.909-0.011c-0.316,0-0.83,0.119-1.265,0.594c-0.435,0.475-1.661,1.622-1.661,3.956c0,2.334,1.7,4.59,1.937,4.906c0.237,0.316,3.282,5.259,8.104,7.161c4.007,1.58,4.823,1.266,5.693,1.187c0.87-0.079,2.807-1.147,3.202-2.255c0.395-1.108,0.395-2.057,0.277-2.255c-0.119-0.198-0.435-0.316-0.909-0.554s-2.807-1.385-3.242-1.543c-0.435-0.158-0.751-0.237-1.068,0.238c-0.316,0.474-1.225,1.543-1.502,1.859c-0.277,0.317-0.554,0.357-1.028,0.119c-0.474-0.238-2.002-0.738-3.815-2.354c-1.41-1.257-2.362-2.81-2.639-3.285c-0.277-0.474-0.03-0.731,0.208-0.968c0.213-0.213,0.474-0.554,0.712-0.831c0.237-0.277,0.316-0.475,0.474-0.791c0.158-0.317,0.079-0.594-0.04-0.831C20.612,19.329,19.69,16.983,19.268,16.045z" clip-rule="evenodd" data-astro-cid-npogderr></path></svg></a><div x-data="{ open: false, query: '' }" x-on:open-search.window="open = true; $nextTick(() =&gt; $refs.searchInput.focus())" x-on:keydown.escape.window="open = false" x-show="open" x-cloak class="fixed inset-0 z-50" data-astro-cid-npogderr><!-- Backdrop --><div class="fixed inset-0 bg-apple-gray-900/50 backdrop-blur-sm" x-show="open" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-on:click="open = false" data-astro-cid-npogderr></div><!-- Search Box --><div class="fixed inset-x-0 top-0 p-4" x-show="open" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-4" data-astro-cid-npogderr><div class="max-w-2xl mx-auto" data-astro-cid-npogderr><div class="relative bg-white rounded-2xl shadow-2xl border border-apple-gray-200 overflow-hidden" data-astro-cid-npogderr><div class="flex items-center px-4" data-astro-cid-npogderr><svg class="w-5 h-5 text-apple-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-astro-cid-npogderr><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" data-astro-cid-npogderr></path></svg><input x-ref="searchInput" x-model="query" x-on:keydown.enter.prevent="if(query.trim()) window.location.href = '/katalog?search=' + encodeURIComponent(query.trim())" type="text" placeholder="Cari produk..." class="w-full px-4 py-4 text-lg border-0 focus:ring-0 focus:outline-none" data-astro-cid-npogderr><button x-on:click="open = false" class="p-2 text-apple-gray-400 hover:text-apple-gray-600" data-astro-cid-npogderr><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-astro-cid-npogderr><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" data-astro-cid-npogderr></path></svg></button></div></div><p class="text-center text-xs text-apple-gray-400 mt-2" data-astro-cid-npogderr>Tekan Enter untuk mencari, Esc untuk tutup</p></div></div></div><!-- Reusable confirm / alert modal (shared across admin + public) --><div x-data="confirmModal()" x-cloak class="fixed inset-0 z-[60] overflow-y-auto" style="z-index: 60;" x-show="open" x-on:keydown.escape.window="if(open){cancelAction()}"><div class="fixed inset-0 transition-opacity duration-200" style="background: rgba(27, 27, 27, 0.5); backdrop-filter: blur(4px);" x-show="open" x-on:click="if(type==='alert')confirmAction()"></div><div class="flex min-h-full items-center justify-center p-4"><div class="relative rounded-2xl shadow-2xl max-w-sm w-full p-5 transition-all duration-200" style="background: white;" x-show="open" x-on:click.stop><div class="flex justify-center mb-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" :style="type === 'confirm' ? 'background: #FEF2F2;' : type === 'success' ? 'background: #F0FDF4;' : 'background: #FEF3C7;'"><i class="text-lg" :class="type === 'confirm' ? 'ph-bold ph-warning-circle' : type === 'success' ? 'ph-bold ph-check-circle' : 'ph-bold ph-info'" :style="type === 'confirm' ? 'color: #DC2626;' : type === 'success' ? 'color: #16A34A;' : 'color: #D97706;'"></i></div></div><h3 class="text-base font-bold text-center mb-1" style="color: #1B1B1B;" x-text="title"></h3><p class="text-sm text-center mb-4" style="color: #6E6E6E;" x-text="message"></p><div class="flex gap-2" :class="type === 'confirm' ? 'justify-end' : 'justify-center'"><template x-if="type === 'confirm'"><div class="flex gap-2"><button type="button" class="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200" style="border: 1px solid #D3D3D3; color: #6E6E6E;" x-on:click="cancelAction()">Batal</button><button type="button" class="px-4 py-2 rounded-xl text-sm font-medium text-white transition-all duration-200 active:scale-95" style="background: #DC2626;" x-on:click="confirmAction()" x-text="confirmText || 'Ya'"></button></div></template><template x-if="type !== 'confirm'"><button type="button" class="px-5 py-2 rounded-xl text-sm font-medium text-white transition-all duration-200 active:scale-95" style="background: #FA0F00;" x-on:click="confirmAction()">Mengerti</button></template></div></div></div></div><!-- Login modal — opened via window.openLoginModal() from any
+         "Masuk" button across the site. Keeps the user in place
+         instead of navigating away to /masuk first. --><div x-data="loginModal()" x-cloak class="fixed inset-0 z-[60] overflow-y-auto" style="z-index: 60;" x-show="open" x-on:keydown.escape.window="if(open){close()}"><div class="fixed inset-0 transition-opacity duration-200" style="background: rgba(27, 27, 27, 0.5); backdrop-filter: blur(4px);" x-show="open" x-on:click="close()"></div><div class="flex min-h-full items-center justify-center p-4"><div class="relative rounded-2xl shadow-2xl w-full max-w-md md:max-w-3xl overflow-hidden md:flex transition-all duration-200" style="background: white;" x-show="open" x-on:click.stop><button type="button" class="absolute top-3 right-3 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-colors" style="color: #6E6E6E;" x-on:click="close()" aria-label="Tutup"><i class="ph-bold ph-x text-lg"></i></button><!-- Hero panel (md+). Uses the same /images/auth/auth-hero.jpg as the
+               full-page auth screens; the gradients underneath show until the
+               file exists. --><div class="hidden md:flex md:w-[45%] flex-shrink-0 flex-col p-7 text-white" style="background-color: #7a0800; background-image: linear-gradient(160deg, rgba(60,0,0,0.85) 0%, rgba(150,8,0,0.5) 60%, rgba(250,15,0,0.3) 100%), url('https://ktitaniumbolt.com/images/auth/auth-hero.jpg'), linear-gradient(135deg, #fa0f00 0%, #4a0400 100%); background-size: cover; background-position: center;"><img src="../images/logo.jpeg" alt="K Titanium Bolt" class="h-9 w-auto self-start rounded-md bg-white p-1 mb-8"><h2 class="text-3xl font-bold leading-tight mb-3">Masuk ke K Titanium Bolt</h2><p class="text-sm leading-relaxed mb-8" style="color: rgba(255,255,255,0.88);">Lanjutkan belanja, lacak pesanan, dan cek harga grosir baut titanium GR5.</p><ul class="flex flex-col gap-4 mt-auto"><li class="flex items-center gap-3"><span class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style="background: #FA0F00;"><i class="ph-bold ph-shopping-cart text-xl"></i></span><span class="leading-tight"><span class="block text-sm font-semibold">Lanjutkan Belanja</span><span class="block text-xs" style="color: rgba(255,255,255,0.78);">Simpan keranjang belanja kamu</span></span></li><li class="flex items-center gap-3"><span class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style="background: #FA0F00;"><i class="ph-bold ph-package text-xl"></i></span><span class="leading-tight"><span class="block text-sm font-semibold">Lacak Pesanan</span><span class="block text-xs" style="color: rgba(255,255,255,0.78);">Pantau pesanan dengan mudah</span></span></li><li class="flex items-center gap-3"><span class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style="background: #FA0F00;"><i class="ph-bold ph-tag text-xl"></i></span><span class="leading-tight"><span class="block text-sm font-semibold">Harga Grosir</span><span class="block text-xs" style="color: rgba(255,255,255,0.78);">Makin banyak beli, makin murah</span></span></li></ul></div><!-- Action panel --><div class="flex-1 p-6 md:p-10 flex flex-col justify-center"><div class="md:hidden flex justify-center mb-4"><div class="w-14 h-14 rounded-full flex items-center justify-center" style="background: #FEF2F2;"><i class="ph-bold ph-user-circle text-3xl" style="color: #FA0F00;"></i></div></div><h2 class="text-xl md:text-2xl font-bold text-center md:text-left mb-1" style="color: #1B1B1B;">Masuk ke K Titanium Bolt</h2><p class="text-sm text-center md:text-left mb-6" style="color: #6E6E6E;">Lanjutkan belanja, lacak pesanan, dan cek harga grosir baut titanium GR5.</p><!-- Lanjut dengan Google --><button type="button" class="flex items-center justify-center gap-2.5 w-full py-3 rounded-xl font-medium text-sm transition-all duration-200 hover:shadow-sm mb-3" style="border: 1px solid #D3D3D3; color: #1B1B1B; background: white;" x-on:click="continueGoogle()" x-on:mouseover="$el.style.background='#FAFAFA'; $el.style.borderColor='#9E9E9E'" x-on:mouseout="$el.style.background='white'; $el.style.borderColor='#D3D3D3'"><svg class="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path></svg>Lanjut dengan Google</button><!-- Lanjut dengan Email --><button type="button" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-white font-semibold text-sm transition-all duration-200 active:scale-[0.98] mb-5" style="background: #FA0F00;" x-on:click="continueEmail()" x-on:mouseover="$el.style.background='#E00D00'" x-on:mouseout="$el.style.background='#FA0F00'"><i class="ph-bold ph-envelope-simple text-base"></i>Lanjut dengan Email</button><!-- Features card (mobile only; the hero panel carries these on md+) --><ul class="md:hidden flex flex-col gap-3 rounded-xl p-3 mb-5" style="background: #FFF5F4;"><li class="flex items-center gap-3"><span class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background: #FEE2E2; color: #FA0F00;"><i class="ph-bold ph-shopping-cart text-lg"></i></span><span class="leading-tight"><span class="block text-sm font-semibold" style="color: #1B1B1B;">Lanjutkan Belanja</span><span class="block text-xs" style="color: #6E6E6E;">Simpan keranjang belanja kamu</span></span></li><li class="flex items-center gap-3"><span class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background: #FEE2E2; color: #FA0F00;"><i class="ph-bold ph-package text-lg"></i></span><span class="leading-tight"><span class="block text-sm font-semibold" style="color: #1B1B1B;">Lacak Pesanan</span><span class="block text-xs" style="color: #6E6E6E;">Pantau pesanan dengan mudah</span></span></li><li class="flex items-center gap-3"><span class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background: #FEE2E2; color: #FA0F00;"><i class="ph-bold ph-tag text-lg"></i></span><span class="leading-tight"><span class="block text-sm font-semibold" style="color: #1B1B1B;">Harga Grosir</span><span class="block text-xs" style="color: #6E6E6E;">Makin banyak beli, makin murah</span></span></li></ul><p class="text-sm text-center md:text-left" style="color: #6E6E6E;">Belum punya akun?<a href="https://ktitaniumbolt.com/daftar" class="font-semibold ml-1" style="color: #FA0F00;">Daftar sekarang →</a></p></div></div></div></div><!-- Toast container for non-blocking notifications (replaces native alert) --><div id="app-toast-container" aria-live="polite" aria-atomic="false" style="position: fixed; bottom: 20px; right: 20px; z-index: 80; display: flex; flex-direction: column-reverse; gap: 8px; pointer-events: none; max-width: calc(100vw - 40px);"><style>
+        #app-toast-container .app-toast { pointer-events: auto; }
+        @media (min-width: 768px) { #app-toast-container { right: 28px; bottom: 28px; } }
+      </style></div><script data-cfasync="false" src="../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+      function confirmModal() {
+        return {
+          open: false,
+          type: 'confirm',
+          title: '',
+          message: '',
+          confirmText: '',
+          onConfirm: null,
+          showConfirm(detail) {
+            this.type = 'confirm';
+            this.title = detail.title || 'Konfirmasi';
+            this.message = detail.message || '';
+            this.confirmText = detail.confirmText || '';
+            this.onConfirm = detail.onConfirm || null;
+            this.open = true;
+          },
+          showAlert(detail) {
+            this.type = detail.type || 'info';
+            this.title = detail.title || 'Informasi';
+            this.message = detail.message || '';
+            this.onConfirm = detail.onConfirm || null;
+            this.open = true;
+          },
+          confirmAction() {
+            if (this.onConfirm) this.onConfirm();
+            this.open = false;
+          },
+          cancelAction() {
+            window.dispatchEvent(new CustomEvent('confirm-cancelled'));
+            this.open = false;
+          },
+        };
+      }
+
+      // LoginModal — keeps the user on the current page when they hit
+      // any "Masuk" button. Two providers:
+      //   - Continue with Google → window.location to backend-go OAuth
+      //   - Continue with Email → navigate to /masuk (full form)
+      // Both carry `redirect=` so the post-login handler knows where
+      // to send the user back to. The current URL is captured at
+      // open() time so the user returns to the page that triggered
+      // the prompt (e.g. /keranjang from a "Checkout" click).
+      function loginModal() {
+        return {
+          open: false,
+          redirect: '',
+          openModal(opts) {
+            // Default to current path so we always have somewhere to
+            // return to. Strip query/hash — they get rebuilt from
+            // server state after login.
+            const here = window.location.pathname;
+            this.redirect = (opts && opts.redirect) || here;
+            this.open = true;
+          },
+          close() {
+            this.open = false;
+          },
+          continueGoogle() {
+            // Same path the existing /masuk Google button uses so
+            // the round-trip stays consistent.
+            const target = this.redirect || '/';
+            window.location.href = '/api/v1/auth/google?redirect=' + encodeURIComponent(target);
+          },
+          continueEmail() {
+            const target = this.redirect || '/';
+            window.location.href = '/masuk?redirect=' + encodeURIComponent(target);
+          },
+        };
+      }
+
+      // Global helper — any "Masuk" button anywhere on the site can
+      // fire this without coupling to the Alpine component.
+      // Usage: <a href="baut-titanium-drat-10-panjang-15cm-m6x15-big-.html#" onclick="window.openLoginModal(); return false;">Masuk</a>
+      window.openLoginModal = function(opts) {
+        const el = document.querySelector('[x-data="loginModal()"]');
+        if (!el) {
+          console.warn('[loginModal] not mounted; falling back to /masuk');
+          window.location.href = '/masuk';
+          return;
+        }
+        const data = (window.Alpine && window.Alpine.$data)
+          ? window.Alpine.$data(el)
+          : el.__x && el.__x.$data;
+        if (data && typeof data.openModal === 'function') {
+          data.openModal(opts || {});
+        } else {
+          window.location.href = '/masuk';
+        }
+      };
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      window.showConfirmDialog = function(title, message, confirmText) {
+        return new Promise((resolve) => {
+          let resolved = false;
+          let openCheckInterval = null;
+
+          const resolveOnce = (val) => {
+            if (resolved) return;
+            resolved = true;
+            if (openCheckInterval) clearInterval(openCheckInterval);
+            resolve(val);
+          };
+
+          const getModalData = () => {
+            const el = document.querySelector('[x-data="confirmModal()"]');
+            if (!el) return null;
+            if (window.Alpine && typeof window.Alpine.$data === 'function') {
+              try { return window.Alpine.$data(el); } catch (_) {}
+            }
+            return el.__x?.$data || null;
+          };
+
+          const watchClose = () => {
+            openCheckInterval = setInterval(() => {
+              const data = getModalData();
+              if (data && !data.open) resolveOnce(false);
+            }, 100);
+          };
+
+          const tryOpen = (attempt) => {
+            const data = getModalData();
+            if (data) {
+              data.showConfirm({ title, message, confirmText, onConfirm: () => resolveOnce(true) });
+              watchClose();
+            } else if (attempt < 50) {
+              setTimeout(() => tryOpen(attempt + 1), 40);
+            } else {
+              // Modal never mounted (e.g. layout missing confirmModal). Fail
+              // safe — resolve false so callers abort the destructive action
+              // rather than silently falling back to a native dialog.
+              console.warn('[confirmModal] not mounted; rejecting confirm');
+              resolveOnce(false);
+            }
+          };
+
+          window.addEventListener('confirm-cancelled', () => resolveOnce(false), { once: true });
+          tryOpen(0);
+        });
+      };
+
+      window.showAlertDialog = function(title, message, type) {
+        type = type || 'info';
+        return new Promise((resolve) => {
+          window.dispatchEvent(new CustomEvent('show-alert', {
+            detail: { title, message, type, onConfirm: () => resolve(true) },
+          }));
+        });
+      };
+
+      // Cancel-order dialog: asks WHY (required) and warns buyers who cancel
+      // repeatedly. Resolves { reason_code, reason_note } or null if dismissed.
+      window.showCancelReasonDialog = function() {
+        const REASONS = [
+          ['salah_pesanan', 'Salah pilih produk/jumlah'],
+          ['ganti_alamat', 'Ingin mengganti alamat pengiriman'],
+          ['ganti_pembayaran', 'Ingin mengganti metode pembayaran'],
+          ['harga_lebih_murah', 'Menemukan harga lebih murah'],
+          ['tidak_jadi', 'Tidak jadi membeli'],
+          ['lainnya', 'Lainnya'],
+        ];
+        return new Promise((resolve) => {
+          const overlay = document.createElement('div');
+          overlay.setAttribute('role', 'dialog');
+          overlay.setAttribute('aria-modal', 'true');
+          overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;';
+          overlay.innerHTML =
+            '<div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:20px;max-height:90vh;overflow:auto;">' +
+              '<h3 style="font-size:18px;font-weight:600;color:#1B1B1B;margin:0 0 4px;">Batalkan Pesanan</h3>' +
+              '<p style="font-size:13px;color:#6E6E6E;margin:0 0 12px;">Kenapa kamu membatalkan pesanan ini?</p>' +
+              '<div id="cr-warning" style="display:none;background:#FFF7E6;border:1px solid #F59E0B;color:#92400E;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px;"></div>' +
+              '<div id="cr-options" style="display:flex;flex-direction:column;gap:8px;">' +
+                REASONS.map(function(r) {
+                  return '<label style="display:flex;gap:8px;align-items:center;font-size:14px;color:#1B1B1B;padding:10px 12px;border:1px solid #D3D3D3;border-radius:10px;cursor:pointer;">' +
+                    '<input type="radio" name="cancel-reason" value="' + r[0] + '" /> ' + escapeHtml(r[1]) + '</label>';
+                }).join('') +
+              '</div>' +
+              '<textarea id="cr-note" maxlength="500" rows="3" placeholder="Ceritakan alasanmu (wajib jika memilih Lainnya)" style="display:none;width:100%;margin-top:8px;border:1px solid #D3D3D3;border-radius:10px;padding:10px;font-size:14px;"></textarea>' +
+              '<p id="cr-error" style="display:none;color:#DC2626;font-size:13px;margin:8px 0 0;"></p>' +
+              '<div style="display:flex;gap:8px;margin-top:16px;">' +
+                '<button type="button" id="cr-back" style="flex:1;padding:12px;border-radius:12px;border:1px solid #D3D3D3;background:#fff;font-size:14px;font-weight:500;color:#6E6E6E;">Kembali</button>' +
+                '<button type="button" id="cr-ok" style="flex:1;padding:12px;border-radius:12px;border:0;background:#FA0F00;color:#fff;font-size:14px;font-weight:600;">Batalkan Pesanan</button>' +
+              '</div>' +
+            '</div>';
+          document.body.appendChild(overlay);
+
+          const done = (val) => { overlay.remove(); resolve(val); };
+          const note = overlay.querySelector('#cr-note');
+          const err = overlay.querySelector('#cr-error');
+          overlay.querySelectorAll('input[name="cancel-reason"]').forEach((el) => {
+            el.addEventListener('change', () => {
+              note.style.display = el.value === 'lainnya' ? 'block' : 'none';
+              err.style.display = 'none';
+            });
+          });
+          overlay.querySelector('#cr-back').addEventListener('click', () => done(null));
+          overlay.addEventListener('click', (e) => { if (e.target === overlay) done(null); });
+          overlay.querySelector('#cr-ok').addEventListener('click', () => {
+            const picked = overlay.querySelector('input[name="cancel-reason"]:checked');
+            if (!picked) { err.textContent = 'Pilih salah satu alasan dulu.'; err.style.display = 'block'; return; }
+            const text = note.value.trim();
+            if (picked.value === 'lainnya' && text.length < 5) {
+              err.textContent = 'Tulis alasan minimal 5 karakter.'; err.style.display = 'block'; return;
+            }
+            done({ reason_code: picked.value, reason_note: text });
+          });
+
+          // Best-effort: warn BEFORE they cancel again. Guests / failures skip silently.
+          fetch('/api/v1/user/cancel-stats', { credentials: 'include' })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((j) => {
+              const d = j && (j.data || j);
+              if (!d || typeof d.count !== 'number') return;
+              // This cancellation would be the (count + 1)-th.
+              if (d.count + 1 >= d.warn_threshold) {
+                const box = overlay.querySelector('#cr-warning');
+                box.textContent = 'Kamu sudah membatalkan ' + d.count + ' pesanan dalam ' + d.window_days +
+                  ' hari terakhir. Pembatalan berulang dicatat dan bisa ditinjau oleh tim kami.';
+                box.style.display = 'block';
+              }
+            })
+            .catch(() => {});
+        });
+      };
+
+      // Wire confirmModal showConfirm/showAlert from window events
+      window.addEventListener('show-confirm', (e) => {
+        const el = document.querySelector('[x-data="confirmModal()"]');
+        if (el && el.__x) el.__x.$data.showConfirm(e.detail);
+      });
+      window.addEventListener('show-alert', (e) => {
+        const el = document.querySelector('[x-data="confirmModal()"]');
+        if (el && el.__x) el.__x.$data.showAlert(e.detail);
+      });
+
+      // Lightweight toast — non-blocking replacement for alert()
+      // usage: window.showToast('message', 'success' | 'info' | 'warning' | 'error', 'Optional Title')
+      window.showToast = function(message, type, title) {
+        type = type || 'info';
+        const palette = {
+          success: { bg: '#10B981', icon: 'ph-check-circle' },
+          info:    { bg: '#FA0F00', icon: 'ph-info' },
+          warning: { bg: '#F59E0B', icon: 'ph-warning' },
+          error:   { bg: '#DC2626', icon: 'ph-warning-circle' },
+        };
+        const p = palette[type] || palette.info;
+        const container = document.getElementById('app-toast-container');
+        if (!container) return;
+        const node = document.createElement('div');
+        node.className = 'app-toast';
+        node.style.cssText = 'background: #1B1B1B; color: white; padding: 12px 16px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); display: flex; align-items: start; gap: 10px; max-width: 360px; width: 100%; font-size: 13px; line-height: 1.4; opacity: 0; transform: translateY(8px); transition: opacity 0.2s, transform 0.2s;';
+        node.innerHTML =
+          '<i class="ph-bold ' + p.icon + '" style="color:' + p.bg + '; font-size: 18px; margin-top: 1px; flex-shrink: 0;"></i>' +
+          '<div style="flex: 1; min-width: 0;">' +
+            (title ? '<div style="font-weight: 600; margin-bottom: 2px;">' + escapeHtml(title) + '</div>' : '') +
+            '<div>' + escapeHtml(message) + '</div>' +
+          '</div>' +
+          '<button type="button" aria-label="Tutup" style="background: transparent; border: 0; color: rgba(255,255,255,0.55); cursor: pointer; padding: 0; font-size: 18px; line-height: 1; margin-left: 4px;">×</button>';
+        const close = () => {
+          node.style.opacity = '0';
+          node.style.transform = 'translateY(8px)';
+          setTimeout(() => node.remove(), 200);
+        };
+        node.querySelector('button').addEventListener('click', close);
+        container.appendChild(node);
+        requestAnimationFrame(() => {
+          node.style.opacity = '1';
+          node.style.transform = 'translateY(0)';
+        });
+        setTimeout(close, type === 'error' ? 6000 : 3500);
+      };
+
+      // Shared "share this product" action — product cards and the
+      // product detail page both call this instead of each rolling
+      // their own Web Share / clipboard logic. Native share sheet where
+      // supported (mobile Chrome/Safari); falls back to copying the
+      // link on desktop browsers that don't implement navigator.share.
+      window.shareProduct = async function(url, title) {
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: title, url: url });
+          } catch (err) {
+            // AbortError = user dismissed the native share sheet — not
+            // a failure, don't show an error toast for it.
+            if (err && err.name !== 'AbortError') {
+              window.showToast('Gagal membagikan produk.', 'error');
+            }
+          }
+          return;
+        }
+        try {
+          await navigator.clipboard.writeText(url);
+          window.showToast('Link produk disalin ke clipboard.', 'success');
+        } catch {
+          window.showToast('Gagal menyalin link.', 'error');
+        }
+      };
+
+      // Wishlist — save-for-later toggle shared by ProductCard.astro's
+      // heart button and the product detail page. window.__wishlistIdsPromise
+      // caches the one-time fetch of the visitor's saved product IDs so
+      // every card on a page (which each carry their own heart button)
+      // doesn't trigger its own separate request.
+      window.__wishlistIdsPromise = null;
+
+      function fetchWishlistIds() {
+        if (!window.__wishlistIdsPromise) {
+          window.__wishlistIdsPromise = fetch('/api/v1/user/wishlist', {
+            credentials: 'include',
+            headers: { Accept: 'application/json' },
+          })
+            .then(function (res) { return res.ok ? res.json() : { data: [] }; })
+            .then(function (data) {
+              var items = data.data || data || [];
+              return new Set(items.map(function (it) { return it.product_id; }));
+            })
+            .catch(function () { return new Set(); });
+        }
+        return window.__wishlistIdsPromise;
+      }
+
+      function setWishlistHeartState(btn, saved) {
+        btn.dataset.saved = saved ? 'true' : 'false';
+        var icon = btn.querySelector('i');
+        if (icon) icon.className = saved ? 'ph-fill ph-heart' : 'ph-bold ph-heart';
+        btn.style.color = saved ? '#FA0F00' : '#1B1B1B';
+        btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+      }
+
+      // Applies the cached wishlist ID set to every [data-wishlist-heart]
+      // button currently in the DOM. Call after rendering product cards
+      // (katalog listing, product detail, related products) so their
+      // hearts reflect saved state without each doing its own fetch.
+      window.syncWishlistHearts = function () {
+        fetchWishlistIds().then(function (ids) {
+          document.querySelectorAll('[data-wishlist-heart]').forEach(function (btn) {
+            setWishlistHeartState(btn, ids.has(Number(btn.dataset.productId)));
+          });
+        });
+      };
+
+      window.toggleWishlist = async function (event, btn) {
+        event.preventDefault();
+        event.stopPropagation();
+        var productId = Number(btn.dataset.productId);
+        var wasSaved = btn.dataset.saved === 'true';
+        var nextSaved = !wasSaved;
+        setWishlistHeartState(btn, nextSaved); // optimistic
+        btn.disabled = true;
+        try {
+          var res = nextSaved
+            ? await fetch('/api/v1/user/wishlist', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ product_id: productId }),
+              })
+            : await fetch('/api/v1/user/wishlist/' + productId, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: { Accept: 'application/json' },
+              });
+
+          if (res.status === 401) {
+            // Same fix as cart/add's 401 handling in lib/api.ts — save the
+            // intent so it replays automatically once actually logged in,
+            // instead of the guest having to notice they got bounced and
+            // re-click the heart from scratch. Wishlist toggle always
+            // means "add" for a guest (they can't have anything saved to
+            // remove yet), so nextSaved is reliably true here.
+            try {
+              sessionStorage.setItem(
+                'ktb:pending_guest_action',
+                JSON.stringify({ type: 'wishlist_add', payload: { product_id: productId } })
+              );
+            } catch {}
+            window.showToast && window.showToast('Masuk dulu untuk menyimpan ke wishlist.', 'info');
+            setTimeout(function () {
+              window.location.href = '/masuk?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+            }, 600);
+            return;
+          }
+          if (!res.ok) throw new Error('wishlist toggle failed');
+
+          // Keep the cached set in sync so navigating to another page
+          // with cards stays correct without a fresh fetch.
+          window.__wishlistIdsPromise = fetchWishlistIds().then(function (ids) {
+            if (nextSaved) ids.add(productId); else ids.delete(productId);
+            return ids;
+          });
+          window.showToast && window.showToast(
+            nextSaved ? 'Ditambahkan ke wishlist.' : 'Dihapus dari wishlist.',
+            'success'
+          );
+        } catch (e) {
+          setWishlistHeartState(btn, wasSaved); // revert
+          window.showToast && window.showToast('Gagal memperbarui wishlist.', 'error');
+        } finally {
+          btn.disabled = false;
+        }
+      };
+
+      // Resume a guest's cart-add or wishlist-save once they're actually
+      // logged in — the counterpart to the two ktb:pending_guest_action
+      // saves above (and in lib/api.ts). Runs on every page load, but the
+      // sessionStorage read makes it a no-op for the overwhelming majority
+      // of visits that never bounced through a login wall. Only fires the
+      // /auth/me check (the one real extra request) when there's actually
+      // something to replay.
+      //
+      // Skipped on /masuk and /daftar themselves: this script also runs
+      // on THOSE pages (right after the redirect that saved the pending
+      // action, before the visitor has actually logged in yet), and an
+      // earlier version of this fix cleared the key here regardless of
+      // auth result — destroying it before login ever happened, so it
+      // was gone by the time the real destination page loaded post-login.
+      (function () {
+        var path = window.location.pathname;
+        if (path.startsWith('/masuk') || path.startsWith('/daftar')) return;
+
+        var raw;
+        try {
+          raw = sessionStorage.getItem('ktb:pending_guest_action');
+        } catch (e) {
+          raw = null;
+        }
+        if (!raw) return;
+        var action;
+        try {
+          action = JSON.parse(raw);
+        } catch (e) {
+          try { sessionStorage.removeItem('ktb:pending_guest_action'); } catch (e2) {}
+          return;
+        }
+
+        function resume() {
+          try { sessionStorage.removeItem('ktb:pending_guest_action'); } catch (e) {}
+          if (action.type === 'cart_add') {
+            fetch('/api/v1/cart/add', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify(action.payload),
+            }).then(function (res) {
+              if (res.ok) {
+                window.dispatchEvent(new CustomEvent('cart-updated'));
+                window.showToast && window.showToast('Produk yang kamu pilih otomatis ditambahkan ke keranjang.', 'success');
+                return;
+              }
+              // The pending action is already consumed, so tell the buyer
+              // instead of silently dropping the item.
+              return res.json().catch(function () { return {}; }).then(function (d) {
+                window.showToast && window.showToast((d && d.message) || 'Produk pilihanmu belum berhasil masuk keranjang. Coba tambahkan lagi.', 'warning');
+              });
+            }).catch(function () {
+              window.showToast && window.showToast('Koneksi bermasalah, produk pilihanmu belum masuk keranjang. Coba tambahkan lagi.', 'warning');
+            });
+          } else if (action.type === 'wishlist_add') {
+            fetch('/api/v1/user/wishlist', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify(action.payload),
+            }).then(function (res) {
+              if (res.ok) {
+                window.__wishlistIdsPromise = fetchWishlistIds().then(function (ids) {
+                  ids.add(action.payload.product_id);
+                  return ids;
+                });
+                window.syncWishlistHearts && window.syncWishlistHearts();
+                window.showToast && window.showToast('Produk otomatis disimpan ke wishlist.', 'success');
+                return;
+              }
+              window.showToast && window.showToast('Produk belum berhasil disimpan ke wishlist. Coba simpan lagi.', 'warning');
+            }).catch(function () {
+              window.showToast && window.showToast('Koneksi bermasalah, produk belum masuk wishlist. Coba simpan lagi.', 'warning');
+            });
+          }
+        }
+
+        // Only worth replaying right after a genuine login — confirm the
+        // session actually exists now before firing anything. /auth/me
+        // always returns HTTP 200 (user: null for guests, same as
+        // lib/auth.ts's fetchMe()) rather than 401, so res.ok alone can't
+        // tell a guest from a logged-in visitor — the body has to be
+        // checked too.
+        fetch('/api/v1/auth/me', { credentials: 'include', headers: { Accept: 'application/json' } })
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (data) {
+            var user = data && (data.data ? data.data.user : data.user);
+            if (user) resume();
+          })
+          .catch(function () {});
+      })();
+    </script><!-- Client error telemetry. Lightweight self-hosted alternative to
+         Sentry. Captures uncaught JS errors and unhandled promise rejections
+         and POSTs them to /api/v1/client-errors. Backend is rate-limited
+         per IP so a runaway loop won't DDoS the table.
+         is:inline + defer keeps it out of the Astro bundle pipeline. --><script>
+      (function () {
+        // Defer until after the page settles so we don't compete with
+        // hydration timing. ~250ms is small enough that errors during
+        // initial render still get captured.
+        function setup() {
+          function send(report) {
+            try {
+              var body = JSON.stringify(report);
+              // navigator.sendBeacon survives unload; falls back to fetch
+              // with keepalive for browsers without beacon support.
+              if (navigator.sendBeacon) {
+                var blob = new Blob([body], { type: 'application/json' });
+                navigator.sendBeacon('/api/v1/client-errors', blob);
+              } else {
+                fetch('/api/v1/client-errors', {
+                  method: 'POST',
+                  body: body,
+                  headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, credentials: 'include',
+                  keepalive: true,
+                }).catch(function () { /* swallow — telemetry shouldn't break the page */ });
+              }
+            } catch (_) { /* never throw from the error handler */ }
+          }
+
+          function normalize(message, source, lineno, colno, error) {
+            // error.stack is the raw browser stack; browsers append
+            // "    at fn (URL:line:col)" which is the most useful part.
+            var stack = (error && (error.stack || error.message)) || message;
+            // Truncate to ~8KB so backend rate-limit / storage doesn't
+            // blow up on minified bundle stacks.
+            if (stack && stack.length > 8192) stack = stack.slice(0, 8192);
+            return {
+              url: location.href,
+              message: String(message || 'Unknown error'),
+              stack: stack,
+              source: source || '',
+              line: lineno || 0,
+              col: colno || 0,
+              user_agent: navigator.userAgent,
+            };
+          }
+
+          window.addEventListener('error', function (ev) {
+            send(normalize(ev.message, ev.filename, ev.lineno, ev.colno, ev.error));
+          });
+
+          window.addEventListener('unhandledrejection', function (ev) {
+            var reason = ev.reason || {};
+            var msg = (reason && reason.message) || String(reason);
+            send(normalize(msg, '', 0, 0, reason));
+          });
+
+          // React error boundaries should also call this global helper.
+          // Hooked in via window.__ktitaniumReportClientError = send.
+          window.__ktitaniumReportClientError = send;
+        }
+        if (document.readyState === 'complete') setup();
+        else window.addEventListener('load', setup, { once: true });
+      })();
+    </script></body></html>

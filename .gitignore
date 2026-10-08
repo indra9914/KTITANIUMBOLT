@@ -1,0 +1,3 @@
+backend/config.local.php
+backend/storage/*.sqlite
+backend/storage/*.sqlite-*

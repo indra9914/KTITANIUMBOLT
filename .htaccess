@@ -1,0 +1,11 @@
+Options -MultiViews
+RewriteEngine On
+
+RewriteRule ^backend/(?:data|storage|config\.local\.php)(?:/|$) - [F,L,NC]
+RewriteRule ^api/v1(?:/.*)?$ backend/index.php [QSA,L]
+RewriteRule ^admin/?$ admin/index.html [L]
+RewriteRule ^katalog\.html$ storefront/catalog.html [L]
+RewriteRule ^katalog/?$ storefront/catalog.html [L]
+RewriteRule ^katalog/(.+?)(?:\.html)?$ storefront/product.html?slug=$1 [QSA,L,NE]
+RewriteRule ^checkout/?$ storefront/checkout.html [L]
+RewriteRule ^pesanan/?$ storefront/order.html [L]

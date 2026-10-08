@@ -1,0 +1,33 @@
+{
+  "name": "K Titanium CMS Admin",
+  "short_name": "K CMS",
+  "description": "K-Titanium Bolt — admin panel untuk landing page onek.ktitaniumbolt.com",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F5F5",
+  "theme_color": "#FA0F00",
+  "lang": "id",
+  "categories": ["productivity", "business"],
+  "icons": [
+    {
+      "src": "/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
